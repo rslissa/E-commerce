@@ -1,0 +1,541 @@
+swagger: "2.0"
+info:
+  description: "This is an API for a wine-olive oil e-shop"
+  version: "1.0.0"
+  title: "e-shop"
+  contact:
+    email: "rs.lissa1997@gmail.com"
+
+host: "localhost"
+basePath: "/api/v1"
+
+tags:
+  - name: "product"
+    description: "Operations about product"
+  - name: "cart"
+    description: "Operations about cart"
+  - name: "user"
+    description: "Operations about user"
+  - name: "address"
+    description: "Operations about address"
+  - name: "shipping"
+    description: "Operations about user and user address"
+schemes:
+  - "https"
+  - "http"
+
+paths:
+  /product/{productName}:
+    post:
+      tags:
+      - "product"
+      description: "Add a new product to the store"
+      operationId: "addProduct"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "productName"
+        in: "path"
+        description: "Name of the product to insert"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        description: "Product object that needs to be added to the store"
+        required: true
+        schema:
+          $ref: "#/definitions/PostProduct"
+      responses:
+        "405":
+          description: "Invalid input"
+    get:
+      tags:
+      - "product"
+      summary: "Find product by name"
+      description: "Returns a single product"
+      operationId: "getProductByName"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "productName"
+        in: "path"
+        description: "Name of product to return"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Product"
+        "400":
+          description: "Invalid name supplied"
+        "404":
+          description: "Product not found"
+    delete:
+      tags:
+      - "product"
+      summary: "Deletes a product"
+      description: "Delete a product"
+      operationId: "deleteProduct"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "productName"
+        in: "path"
+        description: "name of product to delete"
+        required: true
+        type: "string"
+      responses:
+        "400":
+          description: "Invalid name supplied"
+        "404":
+          description: "product not found"
+  /list-products:
+    get:
+        tags:
+          - "product"
+        summary: "List all the products in the store"
+        description: "List all the products in the store"
+        operationId: "listProducts"
+        produces:
+          - "application/json"
+        responses:
+          "200":
+            description: "successful operation"
+            schema:
+              $ref: "#/definitions/AllProducts"
+          "404":
+            description: "Products not found"
+  /cart:
+    get:
+      tags:
+        - "cart"
+      summary: "Create a new cart"
+      description: ""
+      operationId: "createCart"
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Cart"
+  /cart/{cartId}:
+    get:
+      tags:
+        - "cart"
+      summary: "Get cart by id"
+      description: ""
+      operationId: "getCartById"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "cartId"
+          in: "path"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Cart"
+        "400":
+          description: "Invalid id supplied"
+        "404":
+          description: "User not found"
+  /cart/{cartId}/{productId}:
+    post:
+      tags:
+        - "cart"
+      summary: "Add a product to cart"
+      description: "Add a product to cart"
+      operationId: "addProductToCart"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "cartId"
+          in: "path"
+          description: "Id of the cart"
+          required: true
+          type: "integer"
+          format: "int64"
+        - name: "productId"
+          in: "path"
+          description: "Id of the product to insert in the cart"
+          required: true
+          type: "integer"
+          format: "int64"
+        - in: "body"
+          name: "body"
+          description: "Created cart object"
+          required: true
+          schema:
+            type: "object"
+            required:
+              - "quantity"
+            properties:
+              quantity:
+                type: "integer"
+                format: "int64"
+                example: 2
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            required:
+              - "cartId"
+            properties:
+              cartId:
+                type: "integer"
+                format: "int64"
+                example: 5
+  /Shipping:
+    post:
+      tags:
+          - "shipping"
+      description: "Insert shipping informations about user and address"
+      operationId: "createShipping"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Created user and address objects"
+          required: true
+          schema:
+            $ref: "#/definitions/Shipping"
+      responses:
+        default:
+          description: "successful operation"
+
+  /user:
+    post:
+      tags:
+        - "user"
+      description: "Create user"
+      operationId: "createUser"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Created user object"
+          required: true
+          schema:
+            $ref: "#/definitions/User"
+      responses:
+        default:
+          description: "successful operation"
+  /user/{userId}:
+    get:
+      tags:
+        - "user"
+      summary: "Get user by id"
+      description: ""
+      operationId: "getUserById"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "userId"
+          in: "path"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/User"
+        "400":
+          description: "Invalid id supplied"
+        "404":
+          description: "User not found"
+    delete:
+      tags:
+        - "user"
+      summary: "Delete user"
+      operationId: "deleteUser"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "userId"
+          in: "path"
+          description: "The id that needs to be deleted"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        "400":
+          description: "Invalid id supplied"
+        "404":
+          description: "User not found"
+  /address:
+    post:
+      tags:
+        - "address"
+      description: "Add a new address"
+      operationId: "addAddress"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Address object that needs to be added to the database"
+          required: true
+          schema:
+            $ref: "#/definitions/Address"
+      responses:
+        "405":
+          description: "Invalid input"
+  /address/{addressId}:
+    get:
+      tags:
+        - "address"
+      summary: "Find address by ID"
+      description: "Returns a single address"
+      operationId: "getAddressById"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "addressId"
+          in: "path"
+          description: "ID of address to return"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Address"
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "address not found"
+    delete:
+      tags:
+        - "address"
+      summary: "Deletes an address"
+      description: "Delete an address"
+      operationId: "deleteAddress"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "addressId"
+          in: "path"
+          description: "ID of address to delete"
+          required: true
+          type: "integer"
+          format: "int64"
+      responses:
+        "400":
+          description: "Invalid ID supplied"
+        "404":
+          description: "address not found"
+
+definitions:
+  User:
+    type: "object"
+    required:
+      - "firstName"
+      - "lastName"
+      - "email"
+    properties:
+      id_user:
+        type: "integer"
+        format: "int64"
+      firstName:
+        type: "string"
+      lastName:
+        type: "string"
+      email:
+        type: "string"
+
+  Address:
+    type: "object"
+    required:
+      - "city"
+      - "address"
+      - "postalCode"
+      - "country"
+      - "province"
+    properties:
+      id_address:
+        type: "integer"
+        format: "int64"
+      city:
+        type: "string"
+        example: "Roma"
+      address:
+        type: "string"
+        example: "Via Giacomo Matteotti n.23"
+      postalCode:
+        type: "string"
+        example: "97019"
+      country:
+        type: "string"
+        example: "Italia"
+      province:
+        type: "string"
+        maxLength: 2
+        minLength: 2
+        example: "RG"
+  Cart:
+    type: "object"
+    required:
+      - id_cart
+      - creation
+      - last_update
+      - expiring_date
+    properties:
+      id_cart:
+        type: "integer"
+        format: "int64"
+      creation:
+        type: "string"
+        format: "date-time"
+      last_update:
+        type: "string"
+        format: "date-time"
+      buyed:
+        type: "boolean"
+      id_user:
+        type: "integer"
+        format: "int64"
+      expiring_date:
+        type: "string"
+        format: "date-time"
+      total_items:
+        type: "integer"
+        format: "int64"
+      total_unique_items:
+        type: "integer"
+        format: "int64"
+
+  Product:
+    type: "object"
+    required:
+      - "name"
+      - "description"
+      - "price"
+      - "currencyCode"
+      - "status"
+      - "quantity"
+    properties:
+      id_product:
+        type: "integer"
+        format: "int64"
+      name:
+        type: "string"
+        example: "nero d'avola"
+      description:
+        type: "string"
+        example: "è un vino molto buono"
+      price:
+        type: "integer"
+        format: "int64"
+        example: 15
+      currencyCode:
+        type: "string"
+        maxLength: 3
+        minLength: 3
+        example: "EUR"
+      status:
+        type: "boolean"
+      imageURL:
+        type: "string"
+        example: "https://i.ibb.co/L9p2D14/vino-rosso.jpg"
+      quantity:
+        type: "integer"
+        format: "int64"
+        example: 30
+  PostProduct:
+    type: "object"
+    required:
+      - "description"
+      - "price"
+      - "currencyCode"
+      - "status"
+      - "quantity"
+    properties:
+      description:
+        type: "string"
+        example: "è un vino molto buono"
+      price:
+        type: "integer"
+        format: "int64"
+      currencyCode:
+        type: "string"
+        maxLength: 3
+        minLength: 3
+        example: "EUR"
+      status:
+        type: "boolean"
+      imageURL:
+        type: "string"
+        example: "www.blablabla/image.it"
+      quantity:
+        type: "integer"
+        format: "int64"
+        example: 30
+  AllProducts:
+    type: array
+    items:
+      $ref: '#/definitions/Product'
+  Shipping:
+    type: "object"
+    required:
+      - "firstName"
+      - "lastName"
+      - "email"
+      - "city"
+      - "address"
+      - "postalCode"
+      - "country"
+      - "province"
+    properties:
+      firstName:
+        type: "string"
+        example: "Mario"
+      lastName:
+        type: "string"
+        example: "Rossi"
+      email:
+        type: "string"
+        example: "mario.rossi@gmail.com"
+      city:
+        type: "string"
+        example: "Roma"
+      address:
+        type: "string"
+        example: "Via Giacomo Matteotti n.23"
+      postalCode:
+        type: "string"
+        example: "97019"
+      country:
+        type: "string"
+        example: "Italia"
+      province:
+        type: "string"
+        maxLength: 2
+        minLength: 2
+        example: "RG"
+  ApiResponse:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      type:
+        type: "string"
+      message:
+        type: "string"
+externalDocs:
+  description: "Find out more about Swagger"
+  url: "http://swagger.io"
