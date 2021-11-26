@@ -44,28 +44,37 @@ class DatabaseAPI(object):
         return user
 
     def get_product(self, name):
-        return productDB.get_product(self.cursor, name)
+        return productDB.get_product(self.connection.cursor(), name)
+
+    def get_product_by_id(self, idProduct):
+        return productDB.get_product_by_id(self.connection.cursor(), idProduct)
 
     def insert_product(self, name, **kwargs):
-        return productDB.insert_product(self.connection, self.cursor, name, **kwargs)
+        return productDB.insert_product(self.connection, self.connection.cursor(), name, **kwargs)
 
     def list_products(self):
-        return productDB.list_products(self.cursor)
+        return productDB.list_products(self.connection.cursor())
 
     def delete_product(self, name):
-        return productDB.delete_product(self.connection, self.cursor, name)
+        return productDB.delete_product(self.connection, self.connection.cursor(), name)
 
     def create_cart(self):
-        return cartDB.create_cart(self.connection, self.cursor)
+        return cartDB.create_cart(self.connection, self.connection.cursor())
 
     def get_cart(self, idCart):
-        return cartDB.get_cart(self.cursor, idCart)
+        return cartDB.get_cart(self.connection.cursor(), idCart)
 
     def get_cart_product(self, idCart, idProduct):
-        return cartDB.get_cart_product(self.cursor, idCart, idProduct)
+        return cartDB.get_cart_product(self.connection.cursor(), idCart, idProduct)
+
+    def update_cart(self, idCart, newItem, **kwargs):
+        return cartDB.update_cart(self.connection, self.connection.cursor(), idCart, newItem, **kwargs)
 
     def insert_cart_product(self, idCart, idProduct, **kwargs):
-        return cartDB.insert_cart_product(self.connection, self.cursor, idCart, idProduct, **kwargs)
+        return cartDB.insert_cart_product(self.connection, self.connection.cursor(), idCart, idProduct, **kwargs)
+
+    def update_cart_product(self, idCart, idProduct, **body):
+        return cartDB.update_cart_product(self.connection, self.connection.cursor(), idCart, idProduct, **body)
 
     def close_connection(self):
         if self.connection:

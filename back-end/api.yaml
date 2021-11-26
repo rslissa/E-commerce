@@ -146,7 +146,7 @@ paths:
           description: "Invalid id supplied"
         "404":
           description: "User not found"
-  /cart/{cartId}/{productId}:
+  /cart/{cartId}/product/{productId}:
     post:
       tags:
         - "cart"
@@ -393,6 +393,8 @@ definitions:
       - creation
       - last_update
       - expiring_date
+      - total_items
+      - total_unique_items
     properties:
       id_cart:
         type: "integer"

@@ -36,7 +36,7 @@ def create_cart(connection, cursor):
 
 
 def get_cart(cursor, idCart):
-    query = f"SELECT * from public.cart where id_cart = '{idCart}' ORDER BY id_cart ASC"
+    query = f"SELECT * from public.cart where id_cart = {idCart} ORDER BY id_cart ASC"
     cursor.execute(query)
     elements = cursor.fetchall()
     elements_serial = []
@@ -66,6 +66,29 @@ def insert_cart_product(connection, cursor, idCart, idProduct, **kwargs):
     '{idCart}', 
     '{idProduct}', 
     {kwargs.get("quantity")})"""
+    cursor.execute(insert_query)
+    connection.commit()
+
+
+def update_cart(connection, cursor, idCart, newItem, **kwargs):
+    unique_item = 0
+    if newItem == True:
+        unique_item = 1
+    insert_query = f"""
+                    UPDATE cart 
+                    SET total_items = total_items + {kwargs.get("quantity")},
+                        total_unique_items = total_unique_items + {unique_item}
+                    WHERE id_cart = '{idCart}';
+                    """
+    cursor.execute(insert_query)
+    connection.commit()
+
+def update_cart_product(connection, cursor, idCart, idProduct, **kwargs):
+    insert_query = f"""
+                    UPDATE cart_product
+                    SET quantity = quantity + {kwargs.get("quantity")}
+                    WHERE id_cart = {idCart} and id_product={idProduct};
+                    """
     cursor.execute(insert_query)
     connection.commit()
 

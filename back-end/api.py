@@ -56,12 +56,6 @@ class Cart(Resource):
             return None, 404
         return cart
 
-    def post(self, cartId):
-        if cartId != 0:
-            cart = databaseAPI.get_cart(cartId)
-            if not cart:
-                return None, 404
-
 
 class CartProduct(Resource):
     def post(self, cartId, productId):
@@ -74,15 +68,30 @@ class CartProduct(Resource):
             print("2")
             return None, 400
 
+        cart = databaseAPI.get_cart(cartId)
+        if not cart:
+            print("3")
+            return None, 404
+
+        product = databaseAPI.get_product_by_id(productId)
+        if not product:
+            print("4")
+            return None, 404
+
         duplicate = databaseAPI.get_cart_product(cartId, productId)
 
-        if duplicate is not None:
-            print("4")
-            return None, 409
+        if duplicate is None:
+            databaseAPI.insert_cart_product(cartId, productId, **body)
+            databaseAPI.update_cart(cartId, newItem=True, **body)
+            print("5")
+            return None, 201
 
-        databaseAPI.insert_cart_product(cartId, productId, **body)
-        print("5")
-        return None, 201
+        if duplicate is not None:
+            databaseAPI.update_cart_product(cartId, productId, **body)
+            databaseAPI.update_cart(cartId, newItem=False, **body)
+            print("6")
+            return None, 201
+
 
 
 class Product(Resource):

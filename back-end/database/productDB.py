@@ -1,3 +1,20 @@
+def get_product_by_id(cursor, idProduct):
+    query = f"SELECT * from public.product where id_product = {idProduct} ORDER BY id_product ASC"
+    cursor.execute(query)
+    elements = cursor.fetchall()
+    colnames = [desc[0] for desc in cursor.description]
+    if len(elements) == 0:
+        return None
+    results = []
+    for element in elements:
+        el_dict = dict(zip(colnames, element))
+        results.append(el_dict)
+    if len(results) != 1:
+        return False
+    result = results[0]
+    return result
+
+
 def get_product(cursor, name):
     query = f"SELECT * from public.product where name like '{name}' ORDER BY id_product ASC"
     cursor.execute(query)

@@ -4,29 +4,43 @@ import { Products, Navbar, Cart, Checkout } from "./components";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryCache, QueryClientProvider, useQuery } from "react-query";
 import axios from "axios";
+import { ReactQueryDevtools } from "react-query/devtools";
 
 const queryClient = new QueryClient();
-
-const fetchProducts = async () => {
-  const res = await axios.get("http://localhost:5000/api/v1/list-products");
-  return res.data;
-};
-
-const fetchCart = async (id_cart) => {
-  if (id_cart === 0) {
-    const res = await axios.get(`http://localhost:5000/api/v1/cart`);
-    return res.data;
-  } else {
-    const res = await axios.get(`http://localhost:5000/api/v1/cart/${id_cart}`);
-    return res.data;
-  }
-};
 
 const App = () => {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState({});
   const [order, setOrder] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
+
+  const fetchProducts = async () => {
+    const res = await axios.get("http://localhost:5000/api/v1/list-products");
+    return res.data;
+  };
+
+  const fetchCart = async (id_cart) => {
+    //if the ID is 0 create a new cart, else refresh the cart
+    if (id_cart === 0) {
+      const res = await axios.get(`http://localhost:5000/api/v1/cart`);
+      return res.data;
+    } else {
+      const res = await axios.get(`http://localhost:5000/api/v1/cart/${id_cart}`);
+      return res.data;
+    }
+  };
+
+  const addProductOnCart = async (id_cart, id_product, quantity) => {
+    const payload = `{
+              "quantity": ${quantity}
+            }`;
+    const data = JSON.parse(payload);
+    const { data: response } = await axios.post(
+      `http://localhost:5000/api/v1/cart/${id_cart}/product/${id_product}`,
+      data
+    );
+    return response.data;
+  };
 
   const handleAddToCart = async (productId, quantity) => {
     const item = await commerce.cart.add(productId, quantity);
@@ -45,7 +59,6 @@ const App = () => {
 
   const handleEmptyCart = async () => {
     const response = await commerce.cart.empty();
-
     setCart(response.cart);
   };
 
@@ -65,42 +78,44 @@ const App = () => {
     }
   };
 
-  const fillProducts = (value) => {
-    setProducts(value);
-  };
-
-  const fillcart = (value) => {
-    setCart(value);
-  };
-
-  useEffect(() => {
+  const fillProducts = () => {
     fetchProducts()
       .then(function (result) {
-        console.log(Object.values(result));
-        fillProducts(Object.values(result));
+        setProducts(result);
       })
       .catch(function (error) {
         console.log("Failed!", error);
       });
+  };
 
-    const id_cart = 0;
+  const fillcart = async () => {
+    let id_cart = 0;
     if (Object.keys(cart).length !== 0) {
-      id_cart = cart.id_cart;
-      console.log("the cart is not empty");
-    } else {
-      console.log("the cart is empty");
+      id_cart = cart["id_cart"];
     }
 
     fetchCart(id_cart)
       .then(function (result) {
-        console.log(Object.values(result));
-        fillcart(Object.values(result));
+        setCart(result);
+        console.log("100 result: ", result);
       })
       .catch(function (error) {
         console.log("Failed!", error);
       });
-    //fetchProducts();
-    // fetchCart();
+  };
+
+  useEffect(() => {
+    fillProducts();
+    fillcart();
+
+    addProductOnCart(cart["id_cart"], 11, 5)
+      .then(function (result) {
+        setCart(result);
+      })
+      .catch(function (error) {
+        console.log("Failed!", error);
+      });
+    console.log("110 cart: ", cart);
   }, []);
 
   return (
@@ -140,6 +155,7 @@ export default function Wraped() {
   return (
     <QueryClientProvider client={queryClient}>
       <App />
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 }
