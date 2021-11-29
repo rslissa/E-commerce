@@ -11,45 +11,45 @@ const queryClient = new QueryClient();
 const App = () => {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState({});
+  const [cartProducts, setCartProducts] = useState([]);
   const [order, setOrder] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
 
-  const fetchProducts = async () => {
+  const cartId = 1;
+
+  const listProducts = async () => {
     const res = await axios.get("http://localhost:5000/api/v1/list-products");
     return res.data;
   };
 
-  const fetchCart = async (id_cart) => {
-    //if the ID is 0 create a new cart, else refresh the cart
-    if (id_cart === 0) {
-      const res = await axios.get(`http://localhost:5000/api/v1/cart`);
-      return res.data;
-    } else {
-      const res = await axios.get(`http://localhost:5000/api/v1/cart/${id_cart}`);
-      return res.data;
-    }
+  const listProductsByCart = async (id_cart) => {
+    const res = await axios.get(`http://127.0.0.1:5000/api/v1/list-products-by-cart/${id_cart}`);
+    return res.data;
   };
 
-  const addProductOnCart = async (id_cart, id_product, quantity) => {
-    const payload = `{
-              "quantity": ${quantity}
-            }`;
+  const createCart = async () => {
+    const res = await axios.get(`http://localhost:5000/api/v1/cart`);
+    return res.data;
+  };
+
+  const removeProductOnCart = async (id_product) => {
+    const res = await axios.delete(`http://localhost:5000/api/v1/cart/${cart["id_cart"]}/product/${id_product}`);
+    refreshCart(cart["id_cart"]);
+  };
+
+  const getCartById = async (id_cart) => {
+    const res = await axios.get(`http://localhost:5000/api/v1/cart/${id_cart}`);
+    return res.data;
+  };
+
+  const uploadProductOnCart = async (id_product, operation, quantity) => {
+    const payload = `{"operation": "${operation}","quantity": ${quantity}}`;
     const data = JSON.parse(payload);
     const { data: response } = await axios.post(
-      `http://localhost:5000/api/v1/cart/${id_cart}/product/${id_product}`,
+      `http://localhost:5000/api/v1/cart/${cart["id_cart"]}/product/${id_product}`,
       data
     );
-    return response.data;
-  };
-
-  const handleAddToCart = async (productId, quantity) => {
-    const item = await commerce.cart.add(productId, quantity);
-    setCart(item.cart);
-  };
-
-  const handleUpdateCartQty = async (lineItemId, quantity) => {
-    const response = await commerce.cart.update(lineItemId, { quantity });
-    setCart(response.cart);
+    refreshCart(cart["id_cart"]);
   };
 
   const handleRemoveFromCart = async (lineItemId) => {
@@ -62,11 +62,11 @@ const App = () => {
     setCart(response.cart);
   };
 
-  const refreshCart = async () => {
-    const newCart = await commerce.cart.refresh();
+  // const refreshCart = async () => {
+  //   const newCart = await commerce.cart.refresh();
 
-    setCart(newCart);
-  };
+  //   setCart(newCart);
+  // };
 
   const handleCaptureCheckout = async (checkoutTokenId, newOrder) => {
     try {
@@ -78,8 +78,8 @@ const App = () => {
     }
   };
 
-  const fillProducts = () => {
-    fetchProducts()
+  const fetchProducts = () => {
+    listProducts()
       .then(function (result) {
         setProducts(result);
       })
@@ -88,16 +88,17 @@ const App = () => {
       });
   };
 
-  const fillcart = async () => {
-    let id_cart = 0;
-    if (Object.keys(cart).length !== 0) {
-      id_cart = cart["id_cart"];
-    }
-
-    fetchCart(id_cart)
+  const refreshCart = (cartId) => {
+    getCartById(cartId)
       .then(function (result) {
         setCart(result);
-        console.log("100 result: ", result);
+      })
+      .catch(function (error) {
+        console.log("Failed!", error);
+      });
+    listProductsByCart(cartId)
+      .then(function (result) {
+        setCartProducts(result);
       })
       .catch(function (error) {
         console.log("Failed!", error);
@@ -105,35 +106,28 @@ const App = () => {
   };
 
   useEffect(() => {
-    fillProducts();
-    fillcart();
-
-    addProductOnCart(cart["id_cart"], 11, 5)
-      .then(function (result) {
-        setCart(result);
-      })
-      .catch(function (error) {
-        console.log("Failed!", error);
-      });
-    console.log("110 cart: ", cart);
+    fetchProducts();
+    // addProductOnCart(result["id_cart"], 11, 5);
+    //TODO creare un nuovo carrello e non utilizzare sempre lo stesso
+    refreshCart(cartId);
   }, []);
 
   return (
     <>
       <Router>
         <div>
-          <Navbar totalItems={cart.total_items} />
+          <Navbar totalItems={cart["total_items"]} />
           <Routes>
-            <Route exact path="/" element={<Products products={products} onAddToCart={handleAddToCart} />} />
+            <Route exact path="/" element={<Products products={products} onAddToCart={uploadProductOnCart} />} />
             <Route
               exact
               path="/cart"
               element={
                 <Cart
                   cart={cart}
-                  handleUpdateCartQty={handleUpdateCartQty}
-                  handleRemoveFromCart={handleRemoveFromCart}
-                  handleEmptyCart={handleEmptyCart}
+                  cartProducts={cartProducts}
+                  uploadProductOnCart={uploadProductOnCart}
+                  removeProductOnCart={removeProductOnCart}
                 />
               }
             />

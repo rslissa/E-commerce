@@ -76,3 +76,19 @@ def list_products(cursor):
         el_dict = dict(zip(colnames, element))
         results.append(el_dict)
     return results
+
+def list_products_by_cart(cursor, idCart):
+    query = f"""select product.*, cart_product.quantity,  (cart_product.quantity*price) as total_product_price
+                        from product 
+                        join cart_product on product.id_product = cart_product.id_product 
+                        where cart_product.id_cart = {idCart}
+                        """
+    cursor.execute(query)
+    elements = cursor.fetchall()
+    colnames = [desc[0] for desc in cursor.description]
+    results = []
+    for element in elements:
+        el_dict = dict(zip(colnames, element))
+        results.append(el_dict)
+    print(results)
+    return results

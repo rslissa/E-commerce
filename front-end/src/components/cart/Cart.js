@@ -3,14 +3,8 @@ import { Container, Typography, Button, Grid } from "@material-ui/core";
 import CartItem from "./cartItem/CartItem";
 import useStyles from "./styles";
 import { Link } from "react-router-dom";
-const Cart = ({
-  cart,
-  handleUpdateCartQty,
-  handleRemoveFromCart,
-  handleEmptyCart,
-}) => {
+const Cart = ({ cart, cartProducts, uploadProductOnCart, removeProductOnCart }) => {
   const classes = useStyles();
-
   const EmptyCart = () => (
     <Typography variant="subtitle1">
       You have no items in your shopping cart,
@@ -20,25 +14,17 @@ const Cart = ({
     </Typography>
   );
 
-  if (!cart.line_items) return "Loading";
-
   const FilledCart = () => (
     <>
       <Grid container spacing={3}>
-        {cart.line_items.map((item) => (
+        {cartProducts.map((item) => (
           <Grid item xs={12} sm={4} key={item.id}>
-            <CartItem
-              item={item}
-              onUpdateCartQty={handleUpdateCartQty}
-              onRemoveFromCart={handleRemoveFromCart}
-            />
+            <CartItem item={item} uploadProductOnCart={uploadProductOnCart} onRemoveFromCart={removeProductOnCart} />
           </Grid>
         ))}
       </Grid>
       <div className={classes.cardDetails}>
-        <Typography variant="h4">
-          Subtotal: {cart.subtotal.formatted_with_symbol}
-        </Typography>
+        <Typography variant="h4">Subtotal: {cart.total_price} €</Typography>
         <div>
           <Button
             className={classes.emptyButton}
@@ -46,7 +32,7 @@ const Cart = ({
             type="button"
             variant="contained"
             color="secondary"
-            onClick={handleEmptyCart}
+            onClick={removeProductOnCart}
           >
             Empty Cart
           </Button>
@@ -66,7 +52,7 @@ const Cart = ({
     </>
   );
 
-  if (!cart.line_items) return "Loading";
+  if (!cartProducts) return "Loading";
 
   return (
     <Container>
@@ -74,7 +60,8 @@ const Cart = ({
       <Typography className={classes.title} variant="h3" gutterBottom>
         Your Shopping Cart
       </Typography>
-      {!cart.line_items.length ? <EmptyCart /> : <FilledCart />}
+
+      {!cartProducts.length ? <EmptyCart /> : <FilledCart />}
     </Container>
   );
 };

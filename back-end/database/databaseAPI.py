@@ -55,26 +55,36 @@ class DatabaseAPI(object):
     def list_products(self):
         return productDB.list_products(self.connection.cursor())
 
+    def list_products_by_cart(self, idCart):
+        return productDB.list_products_by_cart(self.connection.cursor(),idCart)
+
+
     def delete_product(self, name):
         return productDB.delete_product(self.connection, self.connection.cursor(), name)
 
     def create_cart(self):
         return cartDB.create_cart(self.connection, self.connection.cursor())
 
+    def update_cart(self,newItem, delete, operation, idCart, idProduct, body):
+        return cartDB.update_cart(self.connection, self.connection.cursor(), operation, idCart, idProduct, newItem,delete, body)
+
     def get_cart(self, idCart):
         return cartDB.get_cart(self.connection.cursor(), idCart)
-
-    def get_cart_product(self, idCart, idProduct):
-        return cartDB.get_cart_product(self.connection.cursor(), idCart, idProduct)
-
-    def update_cart(self, idCart, newItem, **kwargs):
-        return cartDB.update_cart(self.connection, self.connection.cursor(), idCart, newItem, **kwargs)
 
     def insert_cart_product(self, idCart, idProduct, **kwargs):
         return cartDB.insert_cart_product(self.connection, self.connection.cursor(), idCart, idProduct, **kwargs)
 
-    def update_cart_product(self, idCart, idProduct, **body):
-        return cartDB.update_cart_product(self.connection, self.connection.cursor(), idCart, idProduct, **body)
+    def get_cart_product(self, idCart, idProduct):
+        return cartDB.get_cart_product(self.connection.cursor(), idCart, idProduct)
+
+    def update_cart_product(self, operation, idCart, idProduct, body):
+        return cartDB.update_cart_product(self.connection, self.connection.cursor(), operation, idCart, idProduct,
+                                          body)
+    def remove_cart_product(self, idCart, idProduct):
+        return cartDB.remove_cart_product(self.connection, self.connection.cursor(), idCart, idProduct)
+
+    def remove_cart_products(self, idCart):
+        return cartDB.remove_cart_products(self.connection, self.connection.cursor(), idCart)
 
     def close_connection(self):
         if self.connection:

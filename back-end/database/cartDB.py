@@ -9,8 +9,8 @@ def json_serial(obj):
 
 
 def create_cart(connection, cursor):
-    insert_query = """INSERT INTO public.cart(creation, last_update, buyed, expiring_date) VALUES (now(), now(), 
-    false, now()+ interval '1 day'); """
+    insert_query = """INSERT INTO public.cart(creation, last_update, buyed, expiring_date,total_items,total_unique_items) VALUES (now(), now(), 
+    false, now()+ interval '1 day',0,0); """
     cursor.execute(insert_query)
     connection.commit()
 
@@ -70,23 +70,36 @@ def insert_cart_product(connection, cursor, idCart, idProduct, **kwargs):
     connection.commit()
 
 
-def update_cart(connection, cursor, idCart, newItem, **kwargs):
+def update_cart(connection, cursor, operation, idCart, idProduct, newItem, delete, body):
     unique_item = 0
+    unique_operation = '+'
     if newItem == True:
         unique_item = 1
+    if delete == True:
+        unique_item = 1
+        unique_operation = '-'
+
     insert_query = f"""
                     UPDATE cart 
-                    SET total_items = total_items + {kwargs.get("quantity")},
-                        total_unique_items = total_unique_items + {unique_item}
-                    WHERE id_cart = '{idCart}';
+                    SET total_items = total_items {operation} {body["quantity"]},
+                        total_unique_items = total_unique_items {unique_operation} {unique_item},
+                        total_price = total_price {operation} (select (product.price*{body["quantity"]})
+                                                                 from cart_product 
+                                                                 join cart 
+                                                                 on cart_product.id_cart = cart.id_cart 
+                                                                 join product
+                                                                 on cart_product.id_product = product.id_product
+                                                                where cart.id_cart = {idCart} and product.id_product = {idProduct})
+                    WHERE id_cart = {idCart};
                     """
+    print(insert_query)
     cursor.execute(insert_query)
     connection.commit()
 
-def update_cart_product(connection, cursor, idCart, idProduct, **kwargs):
+def update_cart_product(connection, cursor,operation, idCart, idProduct, body):
     insert_query = f"""
                     UPDATE cart_product
-                    SET quantity = quantity + {kwargs.get("quantity")}
+                    SET quantity = quantity {operation} {body["quantity"]}
                     WHERE id_cart = {idCart} and id_product={idProduct};
                     """
     cursor.execute(insert_query)
@@ -114,3 +127,19 @@ def get_cart_product(cursor, idCart, idProduct):
         return False
     result = results[0]
     return result
+
+def remove_cart_product(connection, cursor, idCart, idProduct):
+    delete_query = f"Delete from public.cart_product where id_cart = {idCart} and id_product = {idProduct}"
+    cursor.execute(delete_query)
+    connection.commit()
+    count = cursor.rowcount
+    print(count, "Record deleted successfully ")
+    return count
+
+def remove_cart_products(connection, cursor, idCart):
+    delete_query = f"Delete from public.cart_product where id_cart = {idCart}"
+    cursor.execute(delete_query)
+    connection.commit()
+    count = cursor.rowcount
+    print(count, "Record deleted successfully ")
+    return count

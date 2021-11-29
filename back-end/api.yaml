@@ -21,7 +21,6 @@ tags:
   - name: "shipping"
     description: "Operations about user and user address"
 schemes:
-  - "https"
   - "http"
 
 paths:
@@ -108,6 +107,30 @@ paths:
               $ref: "#/definitions/AllProducts"
           "404":
             description: "Products not found"
+  /list-products-by-cart/{cartId}:
+    get:
+        tags:
+          - "product"
+        summary: " Given a cart id return a list of all the products in the cart"
+        description: " Given a cart id return a list of all the products in the cart"
+        operationId: "listProductsByCart"
+        produces:
+          - "application/json"
+        parameters:
+          - name: "cartId"
+            in: "path"
+            description: "Id of the cart"
+            required: true
+            type: "integer"
+            format: "int64"
+        responses:
+          "200":
+            description: "successful operation"
+            schema:
+              $ref: "#/definitions/AllProducts"
+          "404":
+            description: "Products not found"
+
   /cart:
     get:
       tags:
@@ -146,13 +169,33 @@ paths:
           description: "Invalid id supplied"
         "404":
           description: "User not found"
+    delete:
+      tags:
+      - "cart"
+      summary: "Delete the all the products inside a specific cart"
+      description: "Delete the all the products inside a specific cart"
+      operationId: "deleteCartProducts"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "cartId"
+        in: "path"
+        description: "id of the cart"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        "400":
+          description: "Invalid ids supplied"
+        "404":
+          description: "cart not found"
   /cart/{cartId}/product/{productId}:
     post:
       tags:
         - "cart"
-      summary: "Add a product to cart"
-      description: "Add a product to cart"
-      operationId: "addProductToCart"
+      summary: "Update a product to cart"
+      description: "Update a product to cart"
+      operationId: "updateProductToCart"
       produces:
         - "application/json"
       parameters:
@@ -175,8 +218,14 @@ paths:
           schema:
             type: "object"
             required:
+              - "operation"
               - "quantity"
             properties:
+              operation:
+                type: "string"
+                enum: [add, sub]
+                maxLength: 3
+                minLength: 3
               quantity:
                 type: "integer"
                 format: "int64"
@@ -193,6 +242,33 @@ paths:
                 type: "integer"
                 format: "int64"
                 example: 5
+    delete:
+      tags:
+      - "cart"
+      summary: "Delete the product inside cart"
+      description: "Delete the product inside cart"
+      operationId: "deleteCartProduct"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "cartId"
+        in: "path"
+        description: "id of the cart"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "productId"
+        in: "path"
+        description: "id of the product"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        "400":
+          description: "Invalid ids supplied"
+        "404":
+          description: "relation not found"
+
   /Shipping:
     post:
       tags:
@@ -395,6 +471,7 @@ definitions:
       - expiring_date
       - total_items
       - total_unique_items
+      - total_price
     properties:
       id_cart:
         type: "integer"
@@ -416,10 +493,15 @@ definitions:
       total_items:
         type: "integer"
         format: "int64"
+        example: 3
       total_unique_items:
         type: "integer"
         format: "int64"
-
+        example: 2
+      total_price:
+        type: "integer"
+        format: "int64"
+        example: 50
   Product:
     type: "object"
     required:
@@ -429,6 +511,7 @@ definitions:
       - "currencyCode"
       - "status"
       - "quantity"
+      - "total_price"
     properties:
       id_product:
         type: "integer"
@@ -453,10 +536,18 @@ definitions:
       imageURL:
         type: "string"
         example: "https://i.ibb.co/L9p2D14/vino-rosso.jpg"
-      quantity:
+      stock:
         type: "integer"
         format: "int64"
         example: 30
+      quantity:
+        type: "integer"
+        format: "int64"
+        example: 3
+      total_price:
+        type: "integer"
+        format: "int64"
+        example: 45
   PostProduct:
     type: "object"
     required:
@@ -464,7 +555,7 @@ definitions:
       - "price"
       - "currencyCode"
       - "status"
-      - "quantity"
+      - "stock"
     properties:
       description:
         type: "string"
@@ -482,7 +573,7 @@ definitions:
       imageURL:
         type: "string"
         example: "www.blablabla/image.it"
-      quantity:
+      stock:
         type: "integer"
         format: "int64"
         example: 30

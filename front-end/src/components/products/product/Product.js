@@ -8,7 +8,7 @@ const Product = ({ product, onAddToCart }) => {
   if (product.currency_code === "EUR") {
     product.currency_code = "€";
   }
-  const handleAddToCart = () => onAddToCart(product.id_product, 1);
+  const handleAddToCart = () => onAddToCart(product.id_product, "add", 1);
   return (
     <div>
       <Card className={classes.root}>
