@@ -20,7 +20,7 @@ import useStyles from "./styles";
 
 const steps = ["Shipping address", "Payment details"];
 
-const Checkout = ({ cart, order, onCaptureCheckout, error }) => {
+const Checkout = ({ cart, cartProducts, order, onCaptureCheckout, error }) => {
   const [activeStep, setActiveStep] = useState(0);
   const [checkoutToken, setCheckoutToken] = useState(null);
   const [shippingData, setShippingData] = useState({});
@@ -64,7 +64,6 @@ const Checkout = ({ cart, order, onCaptureCheckout, error }) => {
             Thank you for your purchase, {order.customer.firstname} {order.customer.lastname}
           </Typography>
           <Divider className={classes.divider} />
-          <Typography variant="subtitle2">Order ref: {order.customer_reference}</Typography>
         </div>
         <br />
         <Button component={Link} to="/" variant="outlined" type="button">
@@ -100,10 +99,11 @@ const Checkout = ({ cart, order, onCaptureCheckout, error }) => {
 
   const Form = () =>
     activeStep === 0 ? (
-      <AddressForm checkoutToken={checkoutToken} next={next} />
+      <AddressForm next={next} />
     ) : (
       <PaymentForm
-        checkoutToken={checkoutToken}
+        cart={cart}
+        cartProducts={cartProducts}
         shippingData={shippingData}
         nextStep={nextStep}
         backStep={backStep}
@@ -128,7 +128,7 @@ const Checkout = ({ cart, order, onCaptureCheckout, error }) => {
               </Step>
             ))}
           </Stepper>
-          {activeStep === steps.length ? <Confirmation /> : checkoutToken && <Form />}
+          {activeStep === steps.length ? <Confirmation /> : <Form />}
         </Paper>
       </main>
     </>

@@ -137,6 +137,16 @@ def remove_cart_product(connection, cursor, idCart, idProduct):
     return count
 
 def remove_cart_products(connection, cursor, idCart):
+    update_query = f"""
+                    UPDATE cart 
+                    SET total_items = 0,
+                        total_unique_items = 0,
+                        total_price = 0
+                    WHERE id_cart = {idCart};
+                    """
+    cursor.execute(update_query)
+    connection.commit()
+
     delete_query = f"Delete from public.cart_product where id_cart = {idCart}"
     cursor.execute(delete_query)
     connection.commit()

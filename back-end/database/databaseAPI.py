@@ -1,6 +1,6 @@
 import psycopg2
 from psycopg2 import Error
-from database import productDB, cartDB
+from database import productDB, cartDB, addressDB
 
 
 class DatabaseAPI(object):
@@ -58,7 +58,6 @@ class DatabaseAPI(object):
     def list_products_by_cart(self, idCart):
         return productDB.list_products_by_cart(self.connection.cursor(),idCart)
 
-
     def delete_product(self, name):
         return productDB.delete_product(self.connection, self.connection.cursor(), name)
 
@@ -86,6 +85,11 @@ class DatabaseAPI(object):
     def remove_cart_products(self, idCart):
         return cartDB.remove_cart_products(self.connection, self.connection.cursor(), idCart)
 
+    def list_countries(self):
+        return addressDB.list_countries(self.connection.cursor())
+
+    def list_subCountries(self, countryCode):
+        return addressDB.list_subCountries(self.connection.cursor(),countryCode)
     def close_connection(self):
         if self.connection:
             self.cursor.close()

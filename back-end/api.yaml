@@ -18,6 +18,10 @@ tags:
     description: "Operations about user"
   - name: "address"
     description: "Operations about address"
+  - name: "country"
+    description: "Operations about countries"
+  - name: "sub countries"
+    description: "Operations about countries subdivisions"
   - name: "shipping"
     description: "Operations about user and user address"
 schemes:
@@ -349,6 +353,66 @@ paths:
           description: "Invalid id supplied"
         "404":
           description: "User not found"
+  /list-countries:
+    get:
+      tags:
+        - "country"
+      summary: "List all the countries"
+      operationId: "ListCountries"
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/AllCountries"
+        "404":
+          description: "Countries not found"
+  /country/{countryCode}:
+    get:
+      tags:
+        - "country"
+      summary: "Find country by code"
+      description: "Returns a single country"
+      operationId: "getCOuntryByCode"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "countryCode"
+          in: "path"
+          description: "code of country to return"
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Country"
+        "400":
+          description: "Invalid code supplied"
+        "404":
+          description: "code not found"
+  /list-subcountries/{countryCode}:
+    get:
+      tags:
+        - "sub countries"
+      summary: "List all the countries subdivisions of a specific country"
+      operationId: "ListSubCountries"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "countryCode"
+          in: "path"
+          description: "code of country to return"
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/AllSubCountries"
+        "404":
+          description: "Sub Countries not found"
   /address:
     post:
       tags:
@@ -432,7 +496,39 @@ definitions:
         type: "string"
       email:
         type: "string"
-
+  Country:
+    type: "object"
+    properties:
+      country_code:
+        type: "string"
+        example: "IT"
+        maxLength: 2
+        minLength: 2
+      name:
+        type: "string"
+        example: "Italia"
+  AllCountries:
+    type: array
+    items:
+      $ref: '#/definitions/Country'
+  CountrySubdivisions:
+    type: "object"
+    properties:
+      id_subdivision:
+        type: "integer"
+        format: "int64"
+      code:
+        type: "string"
+        example: "RG"
+        maxLength: 2
+        minLength: 2
+      name:
+        type: "string"
+        example: "Ragusa"
+  AllSubCountries:
+    type: array
+    items:
+      $ref: '#/definitions/CountrySubdivisions'
   Address:
     type: "object"
     required:
@@ -581,6 +677,7 @@ definitions:
     type: array
     items:
       $ref: '#/definitions/Product'
+
   Shipping:
     type: "object"
     required:

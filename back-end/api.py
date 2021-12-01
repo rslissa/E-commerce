@@ -55,14 +55,10 @@ class Cart(Resource):
         if not cart:
             return None, 404
         return cart
-    # def delete(self, cartId):
-    #     ret = databaseAPI.delete_cart_products(cartId)
-    #     ret = databaseAPI.remove_cart_product(cartId, productId)
-    #     if not ret:
-    #         return None, 404
-    #
-    #     - aggiorna cart con cartId= cartId e poni tutto a zero
-
+    def delete(self, cartId):
+        ret = databaseAPI.remove_cart_products(cartId)
+        if not ret:
+            return None, 404
 
 
 class CartProduct(Resource):
@@ -172,6 +168,20 @@ class ListProductsByCart(Resource):
         products = databaseAPI.list_products_by_cart(cartId)
         return products
 
+class ListCountries(Resource):
+    def get(self):
+        countries = databaseAPI.list_countries()
+        if not countries:
+            return None, 404
+        return countries
+
+class ListSubCountries(Resource):
+    def get(self, countryCode):
+        subCountries = databaseAPI.list_subCountries(countryCode)
+        if not subCountries:
+            return None, 404
+        return subCountries
+
 
 api.add_resource(Product, f"{basePath}/product/<string:name>")
 api.add_resource(ListProducts, f"{basePath}/list-products")
@@ -180,6 +190,9 @@ api.add_resource(ListProductsByCart, f"{basePath}/list-products-by-cart/<int:car
 api.add_resource(Cart, f"{basePath}/cart/<int:cartId>")
 api.add_resource(NewCart, f"{basePath}/cart")
 api.add_resource(CartProduct, f"{basePath}/cart/<int:cartId>/product/<int:productId>")
+
+api.add_resource(ListCountries, f"{basePath}/list-countries")
+api.add_resource(ListSubCountries, f"{basePath}/list-subcountries/<string:countryCode>")
 
 # api.add_resource(Shipping, f"{basePath}/shipping")
 if __name__ == "__main__":
