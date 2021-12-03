@@ -49,8 +49,8 @@ class DatabaseAPI(object):
     def get_product_by_id(self, idProduct):
         return productDB.get_product_by_id(self.connection.cursor(), idProduct)
 
-    def insert_product(self, name, **kwargs):
-        return productDB.insert_product(self.connection, self.connection.cursor(), name, **kwargs)
+    def insert_product(self, **kwargs):
+        return productDB.insert_product(self.connection, self.connection.cursor(), **kwargs)
 
     def list_products(self):
         return productDB.list_products(self.connection.cursor())
@@ -58,8 +58,8 @@ class DatabaseAPI(object):
     def list_products_by_cart(self, idCart):
         return productDB.list_products_by_cart(self.connection.cursor(), idCart)
 
-    def delete_product(self, name):
-        return productDB.delete_product(self.connection, self.connection.cursor(), name)
+    def delete_product(self, productId):
+        return productDB.delete_product(self.connection, self.connection.cursor(), productId)
 
     def create_cart(self):
         return cartDB.create_cart(self.connection, self.connection.cursor())

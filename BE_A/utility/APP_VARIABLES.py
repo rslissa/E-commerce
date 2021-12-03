@@ -1,4 +1,4 @@
-BASEPATH = "/BEA/v1"
+BASEPATH = "/bea/v1"
 IP = "127.0.0.1"
 PORT = 5001
 

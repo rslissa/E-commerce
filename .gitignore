@@ -1,3 +1,6 @@
 .idea
-BE_A/.idea/*
-BE_B/.idea/*
+BE_A/.idea/
+BE_B/.idea/
+*/*/__pycache__
+BE_B/database/__pycache__/
+*/__pycache__/

@@ -18,13 +18,14 @@ def create_cart(connection, cursor):
     cursor.execute(get_query)
     elements = cursor.fetchall()
     elements_serial = []
+    if len(elements) == 0:
+        return None
     for e in elements[0]:
         elements_serial.append(json_serial(e))
     elements = []
     elements.append(tuple(elements_serial))
     colnames = [desc[0] for desc in cursor.description]
-    if len(elements) == 0:
-        return None
+
     results = []
     for element in elements:
         el_dict = dict(zip(colnames, element))
@@ -39,14 +40,14 @@ def get_cart(cursor, idCart):
     query = f"SELECT * from public.cart where id_cart = {idCart} ORDER BY id_cart ASC"
     cursor.execute(query)
     elements = cursor.fetchall()
+    if len(elements) == 0:
+        return None
     elements_serial = []
     for e in elements[0]:
         elements_serial.append(json_serial(e))
     elements = []
     elements.append(tuple(elements_serial))
     colnames = [desc[0] for desc in cursor.description]
-    if len(elements) == 0:
-        return None
     results = []
     for element in elements:
         el_dict = dict(zip(colnames, element))
@@ -92,7 +93,6 @@ def update_cart(connection, cursor, operation, idCart, idProduct, newItem, delet
                                                                 where cart.id_cart = {idCart} and product.id_product = {idProduct})
                     WHERE id_cart = {idCart};
                     """
-    print(insert_query)
     cursor.execute(insert_query)
     connection.commit()
 
@@ -117,8 +117,6 @@ def get_cart_product(cursor, idCart, idProduct):
         elements_serial.append(json_serial(e))
     elements = [tuple(elements_serial)]
     colnames = [desc[0] for desc in cursor.description]
-    if len(elements) == 0:
-        return None
     results = []
     for element in elements:
         el_dict = dict(zip(colnames, element))

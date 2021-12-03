@@ -49,23 +49,24 @@ class DatabaseAPI(object):
     def get_product_by_id(self, idProduct):
         return productDB.get_product_by_id(self.connection.cursor(), idProduct)
 
-    def insert_product(self, name, **kwargs):
-        return productDB.insert_product(self.connection, self.connection.cursor(), name, **kwargs)
+    def insert_product(self, **kwargs):
+        return productDB.insert_product(self.connection, self.connection.cursor(), **kwargs)
 
     def list_products(self):
         return productDB.list_products(self.connection.cursor())
 
     def list_products_by_cart(self, idCart):
-        return productDB.list_products_by_cart(self.connection.cursor(),idCart)
+        return productDB.list_products_by_cart(self.connection.cursor(), idCart)
 
-    def delete_product(self, name):
-        return productDB.delete_product(self.connection, self.connection.cursor(), name)
+    def delete_product(self, productId):
+        return productDB.delete_product(self.connection, self.connection.cursor(), productId)
 
     def create_cart(self):
         return cartDB.create_cart(self.connection, self.connection.cursor())
 
-    def update_cart(self,newItem, delete, operation, idCart, idProduct, body):
-        return cartDB.update_cart(self.connection, self.connection.cursor(), operation, idCart, idProduct, newItem,delete, body)
+    def update_cart(self, newItem, delete, operation, idCart, idProduct, body):
+        return cartDB.update_cart(self.connection, self.connection.cursor(), operation, idCart, idProduct, newItem,
+                                  delete, body)
 
     def get_cart(self, idCart):
         return cartDB.get_cart(self.connection.cursor(), idCart)
@@ -79,6 +80,7 @@ class DatabaseAPI(object):
     def update_cart_product(self, operation, idCart, idProduct, body):
         return cartDB.update_cart_product(self.connection, self.connection.cursor(), operation, idCart, idProduct,
                                           body)
+
     def remove_cart_product(self, idCart, idProduct):
         return cartDB.remove_cart_product(self.connection, self.connection.cursor(), idCart, idProduct)
 
@@ -89,7 +91,8 @@ class DatabaseAPI(object):
         return addressDB.list_countries(self.connection.cursor())
 
     def list_subCountries(self, countryCode):
-        return addressDB.list_subCountries(self.connection.cursor(),countryCode)
+        return addressDB.list_subCountries(self.connection.cursor(), countryCode)
+
     def close_connection(self):
         if self.connection:
             self.cursor.close()

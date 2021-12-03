@@ -7,7 +7,7 @@ info:
     email: "rs.lissa1997@gmail.com"
 
 host: "localhost"
-basePath: "/api/v1"
+basePath: "/bridge/v1"
 
 tags:
   - name: "product"

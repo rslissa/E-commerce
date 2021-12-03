@@ -32,7 +32,7 @@ def get_product(cursor, name):
     return result
 
 
-def insert_product(connection, cursor, name, **kwargs):
+def insert_product(connection, cursor, **kwargs):
     insert_query = f""" INSERT INTO product (
     name,
     description,
@@ -40,26 +40,22 @@ def insert_product(connection, cursor, name, **kwargs):
     currency_code,
     image_url,
     status,
-    quantity
+    stock
     ) VALUES (
-    '{name}', 
+    '{kwargs.get("name")}', 
     '{kwargs.get("description")}',
     {kwargs.get("price")},
     '{kwargs.get("currencyCode")}',
     '{kwargs.get("imageURL")}',
     {kwargs.get("status")},
-    {kwargs.get("quantity")})"""
-    print(insert_query)
+    {kwargs.get("stock")})"""
     cursor.execute(insert_query)
     connection.commit()
-    query = f"SELECT id_product from product where name='{name}'"
-    cursor.execute(query)
-    record = cursor.fetchall()
-    return record[0][0]
 
 
-def delete_product(connection, cursor, name):
-    delete_query = f"Delete from public.product where name like '{name}'"
+
+def delete_product(connection, cursor, productId):
+    delete_query = f"Delete from public.product where id_product = {productId}"
     cursor.execute(delete_query)
     connection.commit()
     count = cursor.rowcount
