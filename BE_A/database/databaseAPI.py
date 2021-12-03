@@ -1,17 +1,17 @@
 import psycopg2
 from psycopg2 import Error
 from database import productDB, cartDB, addressDB
-
+from utility import APP_VARIABLES
 
 class DatabaseAPI(object):
     def __init__(self):
         try:
             # Connect to an existing database
-            self.connection = psycopg2.connect(user="postgres",
-                                               password="postgres",
-                                               host="127.0.0.1",
-                                               port="5432",
-                                               database="ecommerce")
+            self.connection = psycopg2.connect(user=APP_VARIABLES.DB_USER,
+                                               password=APP_VARIABLES.DB_PASSWORD,
+                                               host=APP_VARIABLES.DB_HOST,
+                                               port=APP_VARIABLES.DB_PORT,
+                                               database=APP_VARIABLES.DB_NAME)
 
             # Create a cursor to perform database operations
             self.cursor = self.connection.cursor()
@@ -56,7 +56,7 @@ class DatabaseAPI(object):
         return productDB.list_products(self.connection.cursor())
 
     def list_products_by_cart(self, idCart):
-        return productDB.list_products_by_cart(self.connection.cursor(),idCart)
+        return productDB.list_products_by_cart(self.connection.cursor(), idCart)
 
     def delete_product(self, name):
         return productDB.delete_product(self.connection, self.connection.cursor(), name)
@@ -64,8 +64,9 @@ class DatabaseAPI(object):
     def create_cart(self):
         return cartDB.create_cart(self.connection, self.connection.cursor())
 
-    def update_cart(self,newItem, delete, operation, idCart, idProduct, body):
-        return cartDB.update_cart(self.connection, self.connection.cursor(), operation, idCart, idProduct, newItem,delete, body)
+    def update_cart(self, newItem, delete, operation, idCart, idProduct, body):
+        return cartDB.update_cart(self.connection, self.connection.cursor(), operation, idCart, idProduct, newItem,
+                                  delete, body)
 
     def get_cart(self, idCart):
         return cartDB.get_cart(self.connection.cursor(), idCart)
@@ -79,6 +80,7 @@ class DatabaseAPI(object):
     def update_cart_product(self, operation, idCart, idProduct, body):
         return cartDB.update_cart_product(self.connection, self.connection.cursor(), operation, idCart, idProduct,
                                           body)
+
     def remove_cart_product(self, idCart, idProduct):
         return cartDB.remove_cart_product(self.connection, self.connection.cursor(), idCart, idProduct)
 
@@ -89,7 +91,8 @@ class DatabaseAPI(object):
         return addressDB.list_countries(self.connection.cursor())
 
     def list_subCountries(self, countryCode):
-        return addressDB.list_subCountries(self.connection.cursor(),countryCode)
+        return addressDB.list_subCountries(self.connection.cursor(), countryCode)
+
     def close_connection(self):
         if self.connection:
             self.cursor.close()
