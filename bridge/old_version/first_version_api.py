@@ -57,14 +57,32 @@ class NewProduct(Resource):
             return None, 400
 
         async_result = pool.apply_async(api_requests.insert_product, (first_backend, body))
-        return_val = async_result.get()
 
-        if return_val[1] == 500:
+        return_val = async_result.get()
+        print(f"return val {return_val}")
+        # ret = api_requests.insert_product(first_backend, body)
+        if return_val[1] == 201:
+            async_result = pool.apply_async(api_requests.insert_product, (second_backend, body))
+
+            second_return_val = async_result.get()
+            # second_ret = api_requests.insert_product(second_backend, body)
+            if second_return_val[1] != 201:
+                sincronized = False
+            print(f"first backend {first_backend}")
+            print(f"second backend {second_backend}")
+            print(f"sincronized flag {sincronized}")
+            return return_val
+        elif return_val[1] == 500:
             switchBackend()
             async_result = pool.apply_async(api_requests.insert_product, (first_backend, body))
-            return_val = async_result.get()
+            second_return_val = async_result.get()
+            if second_return_val[1] == 201:
+                sincronized = False
+            print(f"first backend {first_backend}")
+            print(f"second backend {second_backend}")
+            print(f"sincronized flag {sincronized}")
+            return return_val
 
-        return return_val
 
 
 api.add_resource(NewProduct, f"{basePath}/product")

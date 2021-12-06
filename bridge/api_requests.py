@@ -14,7 +14,17 @@ def get_cart(backend_url, cartId):
             return json.loads(res.text), 200
         else:
             return None, res.status_code
+    except:
+        return None, 500
 
+def get_cart_product(backend_url, cartId, productId):
+    try:
+        url = f'{backend_url}/cart/{cartId}/product'
+        res = requests.get(url)
+        if res.status_code == 200:
+            return json.loads(res.text), 200
+        else:
+            return None, res.status_code
     except:
         return None, 500
 

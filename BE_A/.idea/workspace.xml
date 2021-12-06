@@ -20,24 +20,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="122f16f6-28d5-4dc9-9f1a-cefa6e63c40a" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/../bridge/api_requests.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../bridge/utility/APP_VARIABLES.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../bridge/utility/api.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../bridge/old_version/first_version_api.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../bridge/thread_sincronization/syncronization.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/api.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/cartDB.py" beforeDir="false" afterPath="$PROJECT_DIR$/database/cartDB.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/databaseAPI.py" beforeDir="false" afterPath="$PROJECT_DIR$/database/databaseAPI.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/productDB.py" beforeDir="false" afterPath="$PROJECT_DIR$/database/productDB.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utility/APP_VARIABLES.py" beforeDir="false" afterPath="$PROJECT_DIR$/utility/APP_VARIABLES.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utility/api.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/utility/api.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../BE_B/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../BE_B/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../BE_B/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BE_B/api.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../BE_B/database/cartDB.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BE_B/database/cartDB.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../BE_B/database/databaseAPI.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BE_B/database/databaseAPI.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../BE_B/database/productDB.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BE_B/database/productDB.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../BE_B/utility/APP_VARIABLES.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BE_B/utility/APP_VARIABLES.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../bridge/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/../bridge/api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../bridge/api_requests.py" beforeDir="false" afterPath="$PROJECT_DIR$/../bridge/api_requests.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../bridge/utility/api.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../bridge/utility/api.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,7 +56,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../bridge" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../BE_B" />
     <property name="settings.editor.selected.configurable" value="preferences.keymap" />
   </component>
   <component name="RecentsManager">
@@ -152,31 +145,31 @@
       <screen x="0" y="0" width="1536" height="834" />
     </state>
     <state x="93" y="93" width="1350" height="648" key="DiffContextDialog/0.0.1536.834/1920.0.1024.738@0.0.1536.834" timestamp="1637744367984" />
-    <state x="549" y="172" key="FileChooserDialogImpl" timestamp="1638567233725">
+    <state x="549" y="172" key="FileChooserDialogImpl" timestamp="1638779064277">
       <screen x="0" y="0" width="1536" height="834" />
     </state>
-    <state x="549" y="172" key="FileChooserDialogImpl/0.0.1536.834/1920.0.1024.738@0.0.1536.834" timestamp="1637744227940" />
-    <state x="549" y="172" key="FileChooserDialogImpl/0.0.1536.834@0.0.1536.834" timestamp="1638567233725" />
-    <state width="1515" height="297" key="GridCell.Tab.0.bottom" timestamp="1638567954309">
+    <state x="549" y="172" key="FileChooserDialogImpl/0.0.1536.834/1920.0.1024.738@0.0.1536.834" timestamp="1638605911860" />
+    <state x="549" y="172" key="FileChooserDialogImpl/0.0.1536.834@0.0.1536.834" timestamp="1638779064277" />
+    <state width="1515" height="162" key="GridCell.Tab.0.bottom" timestamp="1638785728001">
       <screen x="0" y="0" width="1536" height="834" />
     </state>
     <state width="1515" height="297" key="GridCell.Tab.0.bottom/0.0.1536.834/1920.0.1024.738@0.0.1536.834" timestamp="1638559341051" />
-    <state width="1515" height="297" key="GridCell.Tab.0.bottom/0.0.1536.834@0.0.1536.834" timestamp="1638567954309" />
-    <state width="1515" height="297" key="GridCell.Tab.0.center" timestamp="1638567954308">
+    <state width="1515" height="162" key="GridCell.Tab.0.bottom/0.0.1536.834@0.0.1536.834" timestamp="1638785728001" />
+    <state width="1515" height="162" key="GridCell.Tab.0.center" timestamp="1638785728001">
       <screen x="0" y="0" width="1536" height="834" />
     </state>
     <state width="1515" height="297" key="GridCell.Tab.0.center/0.0.1536.834/1920.0.1024.738@0.0.1536.834" timestamp="1638559341051" />
-    <state width="1515" height="297" key="GridCell.Tab.0.center/0.0.1536.834@0.0.1536.834" timestamp="1638567954308" />
-    <state width="1515" height="297" key="GridCell.Tab.0.left" timestamp="1638567954307">
+    <state width="1515" height="162" key="GridCell.Tab.0.center/0.0.1536.834@0.0.1536.834" timestamp="1638785728001" />
+    <state width="1515" height="162" key="GridCell.Tab.0.left" timestamp="1638785728001">
       <screen x="0" y="0" width="1536" height="834" />
     </state>
     <state width="1515" height="297" key="GridCell.Tab.0.left/0.0.1536.834/1920.0.1024.738@0.0.1536.834" timestamp="1638559341051" />
-    <state width="1515" height="297" key="GridCell.Tab.0.left/0.0.1536.834@0.0.1536.834" timestamp="1638567954307" />
-    <state width="1515" height="297" key="GridCell.Tab.0.right" timestamp="1638567954308">
+    <state width="1515" height="162" key="GridCell.Tab.0.left/0.0.1536.834@0.0.1536.834" timestamp="1638785728000" />
+    <state width="1515" height="162" key="GridCell.Tab.0.right" timestamp="1638785728001">
       <screen x="0" y="0" width="1536" height="834" />
     </state>
     <state width="1515" height="297" key="GridCell.Tab.0.right/0.0.1536.834/1920.0.1024.738@0.0.1536.834" timestamp="1638559341051" />
-    <state width="1515" height="297" key="GridCell.Tab.0.right/0.0.1536.834@0.0.1536.834" timestamp="1638567954308" />
+    <state width="1515" height="162" key="GridCell.Tab.0.right/0.0.1536.834@0.0.1536.834" timestamp="1638785728001" />
     <state x="277" y="62" key="SettingsEditor" timestamp="1638551946276">
       <screen x="0" y="0" width="1536" height="834" />
     </state>

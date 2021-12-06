@@ -19,8 +19,57 @@ basePath = APP_VARIABLES.BASEPATH
 databaseAPI = DatabaseAPI()
 
 
+class NewProduct(Resource):
+    def post(self):
+        body = request.get_json()
+        if request.is_json:
+            body = request.get_json()
+        else:
+            print("1")
+            return None, 400
+        if not body:
+            print("2")
+            return None, 400
+
+        databaseAPI.insert_product(**body)
+        print("5")
+        return None, 201
+
+
+class Product(Resource):
+    def get(self, productId):
+        product = databaseAPI.get_product_by_id(productId)
+        if not product:
+            return None, 404
+        return product
+
+    def delete(self, productId):
+        ret = databaseAPI.delete_product(productId)
+        if not ret:
+            return None, 404
+
+
+class ListProducts(Resource):
+    def get(self):
+        products = databaseAPI.list_products()
+        if not products:
+            return None, 404
+        return products
+
+
+class ListProductsByCart(Resource):
+    def get(self, cartId):
+        products = databaseAPI.list_products_by_cart(cartId)
+        return products
+
+
 class NewCart(Resource):
     def get(self):
+        carts = databaseAPI.list_carts()
+        if not carts:
+            return None, 404
+        return carts
+    def post(self):
         cart = databaseAPI.create_cart()
         print(cart)
         if not cart:
@@ -33,9 +82,7 @@ class Cart(Resource):
         print(cartId)
         if not isinstance(cartId, int):
             return None, 400
-
         cart = databaseAPI.get_cart(cartId)
-        print(cart)
         if not cart:
             return None, 404
         return cart
@@ -44,6 +91,14 @@ class Cart(Resource):
         ret = databaseAPI.remove_cart_products(cartId)
         if not ret:
             return None, 404
+
+
+class CartProductTable(Resource):
+    def get(self):
+        cartProduct = databaseAPI.get_cart_product_table()
+        if not cartProduct:
+            return None, 404
+        return cartProduct
 
 
 class CartProduct(Resource):
@@ -118,48 +173,6 @@ class CartProduct(Resource):
             return None, 404
 
 
-class NewProduct(Resource):
-    def post(self):
-        if request.is_json:
-            body = request.get_json()
-        else:
-            print("1")
-            return None, 400
-        if not body:
-            print("2")
-            return None, 400
-        databaseAPI.insert_product(**body)
-        print("5")
-        return None, 201
-
-
-class Product(Resource):
-    def get(self, productId):
-        product = databaseAPI.get_product_by_id(productId)
-        if not product:
-            return None, 404
-        return product
-
-    def delete(self, productId):
-        ret = databaseAPI.delete_product(productId)
-        if not ret:
-            return None, 404
-
-
-class ListProducts(Resource):
-    def get(self):
-        products = databaseAPI.list_products()
-        if not products:
-            return None, 404
-        return products
-
-
-class ListProductsByCart(Resource):
-    def get(self, cartId):
-        products = databaseAPI.list_products_by_cart(cartId)
-        return products
-
-
 class ListCountries(Resource):
     def get(self):
         countries = databaseAPI.list_countries()
@@ -185,6 +198,8 @@ api.add_resource(NewCart, f"{basePath}/cart")
 api.add_resource(Cart, f"{basePath}/cart/<int:cartId>")
 
 api.add_resource(CartProduct, f"{basePath}/cart/<int:cartId>/product/<int:productId>")
+
+api.add_resource(CartProductTable, f"{basePath}/cart-product-table")
 
 api.add_resource(ListCountries, f"{basePath}/list-countries")
 api.add_resource(ListSubCountries, f"{basePath}/list-subcountries/<string:countryCode>")

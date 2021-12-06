@@ -47,7 +47,9 @@ paths:
         schema:
           $ref: "#/definitions/PostProduct"
       responses:
-        "405":
+        "201":
+          description: "Created"
+        "400":
           description: "Invalid input"
   /product/{productId}:
     get:
@@ -135,14 +137,16 @@ paths:
             description: "Products not found"
 
   /cart:
-    get:
+    post:
       tags:
         - "cart"
       summary: "Create a new cart"
-      description: ""
       operationId: "createCart"
+      consumes:
+      - "application/json"
       produces:
         - "application/json"
+
       responses:
         "200":
           description: "successful operation"
@@ -430,7 +434,7 @@ paths:
           schema:
             $ref: "#/definitions/Address"
       responses:
-        "405":
+        "400":
           description: "Invalid input"
   /address/{addressId}:
     get:
@@ -597,6 +601,7 @@ definitions:
         type: "integer"
         format: "int64"
         example: 50
+
   Product:
     type: "object"
     required:
