@@ -71,11 +71,14 @@ class DatabaseAPI(object):
     def get_cart(self, idCart):
         return cartDB.get_cart(self.connection.cursor(), idCart)
 
-    def get_cart_product_table(self):
-        return cartDB.get_cart_product_table(self.connection.cursor())
+    def get_cart_product_table(self,timestamp):
+        return cartDB.get_cart_product_table(self.connection.cursor(),timestamp)
 
     def insert_cart_product(self, idCart, idProduct, **kwargs):
         return cartDB.insert_cart_product(self.connection, self.connection.cursor(), idCart, idProduct, **kwargs)
+
+    def overwrite_cart_product(self,idCart, idProduct, body):
+        return cartDB.overwrite_cart_product(self.connection, self.connection.cursor(), idCart, idProduct, body)
 
     def get_cart_product(self, idCart, idProduct):
         return cartDB.get_cart_product(self.connection.cursor(), idCart, idProduct)

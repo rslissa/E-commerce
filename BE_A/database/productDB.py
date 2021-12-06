@@ -66,7 +66,7 @@ def insert_product(connection, cursor, **kwargs):
     '{kwargs.get("imageURL")}',
     {kwargs.get("status")},
     {kwargs.get("stock")},
-    now())"""
+    '{kwargs.get("last_update")}')"""
     cursor.execute(insert_query)
     connection.commit()
 

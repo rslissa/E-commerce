@@ -35,6 +35,7 @@ def create_cart(connection, cursor):
     result = results[0]
     return result
 
+
 def list_carts(cursor):
     cursor.execute("SELECT * from public.cart ORDER BY id_cart ASC")
     elements = cursor.fetchall()
@@ -84,8 +85,15 @@ def insert_cart_product(connection, cursor, idCart, idProduct, **kwargs):
     '{idCart}', 
     '{idProduct}', 
     {kwargs.get("quantity")},
-    now())"""
+    '{kwargs.get("last_update")}')"""
     cursor.execute(insert_query)
+    connection.commit()
+
+
+def overwrite_cart_product(connection, cursor, idCart, idProduct, body):
+    query = f"""UPDATE public.cart_product SET quantity={body["quantity"]}, last_update='{body["last_update"]}' WHERE 
+            id_cart={idCart} and id_product={idProduct}; """
+    cursor.execute(query)
     connection.commit()
 
 
@@ -100,7 +108,7 @@ def update_cart(connection, cursor, operation, idCart, idProduct, newItem, delet
 
     insert_query = f"""
                     UPDATE cart 
-                    SET last_update=now(), total_items = total_items {operation} {body["quantity"]},
+                    SET last_update='{body["last_update"]}', total_items = total_items {operation} {body["quantity"]},
                         total_unique_items = total_unique_items {unique_operation} {unique_item},
                         total_price = total_price {operation} (select (product.price*{body["quantity"]})
                                                                  from cart_product 
@@ -114,17 +122,19 @@ def update_cart(connection, cursor, operation, idCart, idProduct, newItem, delet
     cursor.execute(insert_query)
     connection.commit()
 
-def update_cart_product(connection, cursor,operation, idCart, idProduct, body):
+
+def update_cart_product(connection, cursor, operation, idCart, idProduct, body):
     insert_query = f"""
                     UPDATE cart_product
-                    SET last_update=now(), quantity = quantity {operation} {body["quantity"]}
+                    SET last_update='{body["last_update"]}', quantity = quantity {operation} {body["quantity"]}
                     WHERE id_cart = {idCart} and id_product={idProduct};
                     """
     cursor.execute(insert_query)
     connection.commit()
 
-def get_cart_product_table(cursor):
-    query = f"SELECT * from public.cart_product ORDER BY id_cart, id_product ASC"
+
+def get_cart_product_table(cursor, timestamp):
+    query = f"SELECT * from public.cart_product where last_update >=  '{timestamp}' ORDER BY id_cart, id_product ASC"
     cursor.execute(query)
     elements = cursor.fetchall()
     results = []
@@ -139,6 +149,7 @@ def get_cart_product_table(cursor):
             el_dict = dict(zip(colnames, element))
             results.append(el_dict)
     return results
+
 
 def get_cart_product(cursor, idCart, idProduct):
     query = f"SELECT * from public.cart_product where id_cart = '{idCart}' and id_product= '{idProduct}' ORDER BY id_cart ASC"
@@ -160,6 +171,7 @@ def get_cart_product(cursor, idCart, idProduct):
     result = results[0]
     return result
 
+
 def remove_cart_product(connection, cursor, idCart, idProduct):
     delete_query = f"Delete from public.cart_product where id_cart = {idCart} and id_product = {idProduct}"
     cursor.execute(delete_query)
@@ -167,6 +179,7 @@ def remove_cart_product(connection, cursor, idCart, idProduct):
     count = cursor.rowcount
     print(count, "Record deleted successfully ")
     return count
+
 
 def remove_cart_products(connection, cursor, idCart):
     update_query = f"""

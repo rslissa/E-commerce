@@ -94,14 +94,48 @@ class Cart(Resource):
 
 
 class CartProductTable(Resource):
-    def get(self):
-        cartProduct = databaseAPI.get_cart_product_table()
+    def get(self, timestamp):
+        cartProduct = databaseAPI.get_cart_product_table(timestamp)
         if not cartProduct:
             return None, 404
         return cartProduct
 
 
 class CartProduct(Resource):
+    def get(self, cartId, productId):
+        cartProduct = databaseAPI.get_cart_product(cartId, productId)
+        if not cartProduct:
+            return None, 404
+        print(cartProduct)
+        return cartProduct
+
+    def put(self, cartId, productId):
+        if not isinstance(cartId, int):
+            return None, 400
+        if not isinstance(productId, int):
+            return None, 400
+        if request.is_json:
+            body = request.get_json()
+        else:
+            print("1")
+            return None, 400
+        if not body:
+            print("2")
+            return None, 400
+
+        cart = databaseAPI.get_cart(cartId)
+        if not cart:
+            print("3")
+            return None, 404
+
+        product = databaseAPI.get_product_by_id(productId)
+        if not product:
+            print("4")
+            return None, 404
+
+        databaseAPI.overwrite_cart_product(idCart=cartId, idProduct=productId, body=body)
+
+
     def post(self, cartId, productId):
         if not isinstance(cartId, int):
             return None, 400
@@ -199,7 +233,7 @@ api.add_resource(Cart, f"{basePath}/cart/<int:cartId>")
 
 api.add_resource(CartProduct, f"{basePath}/cart/<int:cartId>/product/<int:productId>")
 
-api.add_resource(CartProductTable, f"{basePath}/cart-product-table")
+api.add_resource(CartProductTable, f"{basePath}/cart-product-table/<string:timestamp>")
 
 api.add_resource(ListCountries, f"{basePath}/list-countries")
 api.add_resource(ListSubCountries, f"{basePath}/list-subcountries/<string:countryCode>")
