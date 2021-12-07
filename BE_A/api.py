@@ -222,6 +222,11 @@ class ListSubCountries(Resource):
             return None, 404
         return subCountries
 
+class Disponibility(Resource):
+    def get(self):
+        return 'ok', 200
+
+api.add_resource(Disponibility, f"{basePath}")
 
 api.add_resource(NewProduct, f"{basePath}/product")
 api.add_resource(Product, f"{basePath}/product/<int:productId>")

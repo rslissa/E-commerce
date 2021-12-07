@@ -69,6 +69,7 @@ class NewCart(Resource):
         if not carts:
             return None, 404
         return carts
+
     def post(self):
         cart = databaseAPI.create_cart()
         print(cart)
@@ -134,7 +135,6 @@ class CartProduct(Resource):
             return None, 404
 
         databaseAPI.overwrite_cart_product(idCart=cartId, idProduct=productId, body=body)
-
 
     def post(self, cartId, productId):
         if not isinstance(cartId, int):
@@ -223,6 +223,13 @@ class ListSubCountries(Resource):
         return subCountries
 
 
+class Disponibility(Resource):
+    def get(self):
+        return 'ok', 200
+
+
+api.add_resource(Disponibility, f"{basePath}")
+
 api.add_resource(NewProduct, f"{basePath}/product")
 api.add_resource(Product, f"{basePath}/product/<int:productId>")
 api.add_resource(ListProducts, f"{basePath}/list-products")
@@ -238,6 +245,5 @@ api.add_resource(CartProductTable, f"{basePath}/cart-product-table/<string:times
 api.add_resource(ListCountries, f"{basePath}/list-countries")
 api.add_resource(ListSubCountries, f"{basePath}/list-subcountries/<string:countryCode>")
 
-# api.add_resource(Shipping, f"{basePath}/shipping")
 if __name__ == "__main__":
     app.run(host=APP_VARIABLES.IP, port=APP_VARIABLES.PORT, debug=True)
