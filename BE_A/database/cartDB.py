@@ -9,8 +9,8 @@ def json_serial(obj):
 
 
 def create_cart(connection, cursor):
-    insert_query = """INSERT INTO public.cart(creation, last_update, buyed, expiring_date,total_items,total_unique_items) VALUES (now(), now(), 
-    false, now()+ interval '1 day',0,0); """
+    insert_query = """INSERT INTO public.cart(creation, last_update, buyed, expiring_date,total_items,
+    total_unique_items) VALUES (now(), now(), false, now()+ interval '1 day',0,0); """
     cursor.execute(insert_query)
     connection.commit()
 
@@ -22,13 +22,12 @@ def create_cart(connection, cursor):
         return None
     for e in elements[0]:
         elements_serial.append(json_serial(e))
-    elements = []
-    elements.append(tuple(elements_serial))
-    colnames = [desc[0] for desc in cursor.description]
+    elements = [tuple(elements_serial)]
+    col_names = [desc[0] for desc in cursor.description]
 
     results = []
     for element in elements:
-        el_dict = dict(zip(colnames, element))
+        el_dict = dict(zip(col_names, element))
         results.append(el_dict)
     if len(results) != 1:
         return False
@@ -44,17 +43,16 @@ def list_carts(cursor):
         elements_serial = []
         for e in element:
             elements_serial.append(json_serial(e))
-        elements = []
-        elements.append(tuple(elements_serial))
-        colnames = [desc[0] for desc in cursor.description]
+        elements = [tuple(elements_serial)]
+        col_names = [desc[0] for desc in cursor.description]
         for element in elements:
-            el_dict = dict(zip(colnames, element))
+            el_dict = dict(zip(col_names, element))
             results.append(el_dict)
     return results
 
 
-def get_cart(cursor, idCart):
-    query = f"SELECT * from public.cart where id_cart = {idCart} ORDER BY id_cart ASC"
+def get_cart(cursor, cart_id):
+    query = f"SELECT * from public.cart where id_cart = {cart_id} ORDER BY id_cart ASC"
     cursor.execute(query)
     elements = cursor.fetchall()
     if len(elements) == 0:
@@ -62,12 +60,11 @@ def get_cart(cursor, idCart):
     elements_serial = []
     for e in elements[0]:
         elements_serial.append(json_serial(e))
-    elements = []
-    elements.append(tuple(elements_serial))
-    colnames = [desc[0] for desc in cursor.description]
+    elements = [tuple(elements_serial)]
+    col_names = [desc[0] for desc in cursor.description]
     results = []
     for element in elements:
-        el_dict = dict(zip(colnames, element))
+        el_dict = dict(zip(col_names, element))
         results.append(el_dict)
     if len(results) != 1:
         return False
@@ -75,34 +72,49 @@ def get_cart(cursor, idCart):
     return result
 
 
-def insert_cart_product(connection, cursor, idCart, idProduct, **kwargs):
+def insert_cart_product(connection, cursor, cart_id, product_id, **kwargs):
     insert_query = f""" INSERT INTO public.cart_product (
     id_cart,
     id_product,
     quantity,
     last_update
     ) VALUES (
-    '{idCart}', 
-    '{idProduct}', 
+    '{cart_id}', 
+    '{product_id}', 
     {kwargs.get("quantity")},
     '{kwargs.get("last_update")}')"""
     cursor.execute(insert_query)
     connection.commit()
 
 
-def overwrite_cart_product(connection, cursor, idCart, idProduct, body):
+def overwrite_cart_product(connection, cursor, cart_id, product_id, body):
     query = f"""UPDATE public.cart_product SET quantity={body["quantity"]}, last_update='{body["last_update"]}' WHERE 
-            id_cart={idCart} and id_product={idProduct}; """
+            id_cart={cart_id} and id_product={product_id}; """
     cursor.execute(query)
     connection.commit()
 
 
-def update_cart(connection, cursor, operation, idCart, idProduct, newItem, delete, body):
+def insert_cart_by_id(connection, cursor, cart_id, body):
+    ret = get_cart(cursor, cart_id)
+    query = ""
+    print(body)
+    if ret is None:
+        query = f"""INSERT INTO public.cart(id_cart, creation, last_update, buyed, expiring_date, total_items, 
+        total_unique_items, total_price) VALUES ({cart_id}, now(), '{body['last_update']}', False, now(), 
+        {body['total_items']}, {body['total_unique_items']}, {body['total_price']}); """
+    if ret is not None:
+        query = f"""UPDATE public.cart SET last_update='{body['last_update']}', buyed={body['buyed']}, 
+        total_items={body['total_items']}, total_unique_items={body['total_unique_items']}, total_price={body['total_price']}
+        WHERE id_cart={cart_id};"""
+    cursor.execute(query)
+    connection.commit()
+
+def update_cart(connection, cursor, operation, cart_id, product_id, new_item, delete, body):
     unique_item = 0
     unique_operation = '+'
-    if newItem == True:
+    if new_item:
         unique_item = 1
-    if delete == True:
+    if delete:
         unique_item = 1
         unique_operation = '-'
 
@@ -116,21 +128,38 @@ def update_cart(connection, cursor, operation, idCart, idProduct, newItem, delet
                                                                  on cart_product.id_cart = cart.id_cart 
                                                                  join product
                                                                  on cart_product.id_product = product.id_product
-                                                                where cart.id_cart = {idCart} and product.id_product = {idProduct})
-                    WHERE id_cart = {idCart};
+                                                                where cart.id_cart = {cart_id} and product.id_product = {product_id}) 
+                    WHERE id_cart = {cart_id};
                     """
     cursor.execute(insert_query)
     connection.commit()
 
 
-def update_cart_product(connection, cursor, operation, idCart, idProduct, body):
+def update_cart_product(connection, cursor, operation, cart_id, product_id, body):
     insert_query = f"""
                     UPDATE cart_product
                     SET last_update='{body["last_update"]}', quantity = quantity {operation} {body["quantity"]}
-                    WHERE id_cart = {idCart} and id_product={idProduct};
+                    WHERE id_cart = {cart_id} and id_product={product_id};
                     """
     cursor.execute(insert_query)
     connection.commit()
+
+
+def get_cart_table(cursor, timestamp):
+    query = f"SELECT * from public.cart where last_update >= '{timestamp}' ORDER BY id_cart ASC"
+    cursor.execute(query)
+    elements = cursor.fetchall()
+    results = []
+    for element in elements:
+        elements_serial = []
+        for e in element:
+            elements_serial.append(json_serial(e))
+        elements = [tuple(elements_serial)]
+        col_names = [desc[0] for desc in cursor.description]
+        for element in elements:
+            el_dict = dict(zip(col_names, element))
+            results.append(el_dict)
+    return results
 
 
 def get_cart_product_table(cursor, timestamp):
@@ -142,17 +171,17 @@ def get_cart_product_table(cursor, timestamp):
         elements_serial = []
         for e in element:
             elements_serial.append(json_serial(e))
-        elements = []
-        elements.append(tuple(elements_serial))
-        colnames = [desc[0] for desc in cursor.description]
+        elements = [tuple(elements_serial)]
+        col_names = [desc[0] for desc in cursor.description]
         for element in elements:
-            el_dict = dict(zip(colnames, element))
+            el_dict = dict(zip(col_names, element))
             results.append(el_dict)
     return results
 
 
-def get_cart_product(cursor, idCart, idProduct):
-    query = f"SELECT * from public.cart_product where id_cart = '{idCart}' and id_product= '{idProduct}' ORDER BY id_cart ASC"
+def get_cart_product(cursor, cart_id, product_id):
+    query = f"SELECT * from public.cart_product where id_cart = '{cart_id}' and id_product= '{product_id}' ORDER BY " \
+            f"id_cart ASC "
     cursor.execute(query)
     elements = cursor.fetchall()
     if len(elements) == 0:
@@ -161,10 +190,10 @@ def get_cart_product(cursor, idCart, idProduct):
     for e in elements[0]:
         elements_serial.append(json_serial(e))
     elements = [tuple(elements_serial)]
-    colnames = [desc[0] for desc in cursor.description]
+    col_names = [desc[0] for desc in cursor.description]
     results = []
     for element in elements:
-        el_dict = dict(zip(colnames, element))
+        el_dict = dict(zip(col_names, element))
         results.append(el_dict)
     if len(results) != 1:
         return False
@@ -172,8 +201,8 @@ def get_cart_product(cursor, idCart, idProduct):
     return result
 
 
-def remove_cart_product(connection, cursor, idCart, idProduct):
-    delete_query = f"Delete from public.cart_product where id_cart = {idCart} and id_product = {idProduct}"
+def remove_cart_product(connection, cursor, cart_id, product_id):
+    delete_query = f"Delete from public.cart_product where id_cart = {cart_id} and id_product = {product_id}"
     cursor.execute(delete_query)
     connection.commit()
     count = cursor.rowcount
@@ -181,18 +210,18 @@ def remove_cart_product(connection, cursor, idCart, idProduct):
     return count
 
 
-def remove_cart_products(connection, cursor, idCart):
+def remove_cart_products(connection, cursor, cart_id):
     update_query = f"""
                     UPDATE cart 
                     SET total_items = 0,
                         total_unique_items = 0,
                         total_price = 0
-                    WHERE id_cart = {idCart};
+                    WHERE id_cart = {cart_id};
                     """
     cursor.execute(update_query)
     connection.commit()
 
-    delete_query = f"Delete from public.cart_product where id_cart = {idCart}"
+    delete_query = f"Delete from public.cart_product where id_cart = {cart_id}"
     cursor.execute(delete_query)
     connection.commit()
     count = cursor.rowcount

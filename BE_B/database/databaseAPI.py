@@ -3,6 +3,7 @@ from psycopg2 import Error
 from database import productDB, cartDB, addressDB
 from utility import APP_VARIABLES
 
+
 class DatabaseAPI(object):
     def __init__(self):
         try:
@@ -43,8 +44,8 @@ class DatabaseAPI(object):
         user = results[0]
         return user
 
-    def get_product_by_id(self, idProduct):
-        return productDB.get_product_by_id(self.connection.cursor(), idProduct)
+    def get_product_by_id(self, product_id):
+        return productDB.get_product_by_id(self.connection.cursor(), product_id)
 
     def insert_product(self, **kwargs):
         return productDB.insert_product(self.connection, self.connection.cursor(), **kwargs)
@@ -52,52 +53,58 @@ class DatabaseAPI(object):
     def list_products(self):
         return productDB.list_products(self.connection.cursor())
 
-    def list_products_by_cart(self, idCart):
-        return productDB.list_products_by_cart(self.connection.cursor(), idCart)
+    def list_products_by_cart(self, cart_id):
+        return productDB.list_products_by_cart(self.connection.cursor(), cart_id)
 
-    def delete_product(self, productId):
-        return productDB.delete_product(self.connection, self.connection.cursor(), productId)
+    def delete_product(self, product_id):
+        return productDB.delete_product(self.connection, self.connection.cursor(), product_id)
 
     def create_cart(self):
         return cartDB.create_cart(self.connection, self.connection.cursor())
 
-    def update_cart(self, newItem, delete, operation, idCart, idProduct, body):
-        return cartDB.update_cart(self.connection, self.connection.cursor(), operation, idCart, idProduct, newItem,
+    def update_cart(self, new_item, delete, operation, cart_id, product_id, body):
+        return cartDB.update_cart(self.connection, self.connection.cursor(), operation, cart_id, product_id, new_item,
                                   delete, body)
 
     def list_carts(self):
         return cartDB.list_carts(self.connection.cursor())
 
-    def get_cart(self, idCart):
-        return cartDB.get_cart(self.connection.cursor(), idCart)
+    def get_cart(self, cart_id):
+        return cartDB.get_cart(self.connection.cursor(), cart_id)
 
-    def get_cart_product_table(self,timestamp):
-        return cartDB.get_cart_product_table(self.connection.cursor(),timestamp)
+    def get_cart_table(self, timestamp):
+        return cartDB.get_cart_table(self.connection.cursor(), timestamp)
 
-    def insert_cart_product(self, idCart, idProduct, **kwargs):
-        return cartDB.insert_cart_product(self.connection, self.connection.cursor(), idCart, idProduct, **kwargs)
+    def get_cart_product_table(self, timestamp):
+        return cartDB.get_cart_product_table(self.connection.cursor(), timestamp)
 
-    def overwrite_cart_product(self,idCart, idProduct, body):
-        return cartDB.overwrite_cart_product(self.connection, self.connection.cursor(), idCart, idProduct, body)
+    def insert_cart_product(self, cart_id, product_id, **kwargs):
+        return cartDB.insert_cart_product(self.connection, self.connection.cursor(), cart_id, product_id, **kwargs)
 
-    def get_cart_product(self, idCart, idProduct):
-        return cartDB.get_cart_product(self.connection.cursor(), idCart, idProduct)
+    def overwrite_cart_product(self, cart_id, product_id, body):
+        return cartDB.overwrite_cart_product(self.connection, self.connection.cursor(), cart_id, product_id, body)
 
-    def update_cart_product(self, operation, idCart, idProduct, body):
-        return cartDB.update_cart_product(self.connection, self.connection.cursor(), operation, idCart, idProduct,
+    def insert_cart_by_id(self, cart_id, body):
+        return cartDB.insert_cart_by_id(self.connection, self.connection.cursor(), cart_id, body)
+
+    def get_cart_product(self, cart_id, product_id):
+        return cartDB.get_cart_product(self.connection.cursor(), cart_id, product_id)
+
+    def update_cart_product(self, operation, cart_id, product_id, body):
+        return cartDB.update_cart_product(self.connection, self.connection.cursor(), operation, cart_id, product_id,
                                           body)
 
-    def remove_cart_product(self, idCart, idProduct):
-        return cartDB.remove_cart_product(self.connection, self.connection.cursor(), idCart, idProduct)
+    def remove_cart_product(self, cart_id, product_id):
+        return cartDB.remove_cart_product(self.connection, self.connection.cursor(), cart_id, product_id)
 
-    def remove_cart_products(self, idCart):
-        return cartDB.remove_cart_products(self.connection, self.connection.cursor(), idCart)
+    def remove_cart_products(self, cart_id):
+        return cartDB.remove_cart_products(self.connection, self.connection.cursor(), cart_id)
 
     def list_countries(self):
         return addressDB.list_countries(self.connection.cursor())
 
-    def list_subCountries(self, countryCode):
-        return addressDB.list_subCountries(self.connection.cursor(), countryCode)
+    def list_sub_countries(self, country_code):
+        return addressDB.list_subCountries(self.connection.cursor(), country_code)
 
     def close_connection(self):
         if self.connection:
