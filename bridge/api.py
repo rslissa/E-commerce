@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_restful import Api, Resource
 from flask_cors import CORS, cross_origin
 from utility import APP_VARIABLES
-import api_requests
+from api_requests import cart_api, product_api, cart_product_api
 
 first_backend = APP_VARIABLES.BE_A_URL
 second_backend = APP_VARIABLES.BE_B_URL
@@ -35,15 +35,37 @@ def login():
 basePath = APP_VARIABLES.BRIDGE_BASEPATH
 
 
+class NewCart(Resource):
+    def post(self):
+        if request.is_json:
+            body = request.get_json()
+        else:
+            print("1")
+            return None, 400
+        if not body:
+            print("2")
+            return None, 400
+
+        async_result = pool.apply_async(cart_api.insert_cart, (first_backend))
+        return_val = async_result.get()
+
+        if return_val[1] == 500:
+            async_result = pool.apply_async(cart_api.insert_cart, (second_backend))
+            return_val = async_result.get()
+
+        return return_val
+
+
 class Cart(Resource):
-    def get(self, cartId):
-        ret = api_requests.get_cart(first_backend, cartId)
+    def get(self, cart_id):
+        ret = cart_api.get_cart(first_backend, cart_id)
         if ret[1] == 500:
-            ret = api_requests.get_cart(second_backend, cartId)
+            ret = cart_api.get_cart(second_backend, cart_id)
         return ret
-    def delete(self, cartId):
-        pool.apply_async(api_requests.delete_cart, (first_backend, cartId))
-        pool.apply_async(api_requests.delete_cart, (second_backend, cartId))
+
+    def delete(self, cart_id):
+        pool.apply_async(cart_api.delete_cart, (first_backend, cart_id))
+        pool.apply_async(cart_api.delete_cart, (second_backend, cart_id))
 
 
 class NewProduct(Resource):
@@ -57,18 +79,46 @@ class NewProduct(Resource):
             print("2")
             return None, 400
 
-        async_result = pool.apply_async(api_requests.insert_product, (first_backend, body))
+        async_result = pool.apply_async(product_api.insert_product, (first_backend, body))
         return_val = async_result.get()
 
         if return_val[1] == 500:
-            async_result = pool.apply_async(api_requests.insert_product, (second_backend, body))
+            async_result = pool.apply_async(product_api.insert_product, (second_backend, body))
             return_val = async_result.get()
 
         return return_val
 
 
+class Product(Resource):
+    def get(self, product_id):
+        ret = product_api.get_product(first_backend, product_id)
+        if ret[1] == 500:
+            ret = product_api.get_product(second_backend, product_id)
+        return ret
+
+    def delete(self, product_id):
+        pool.apply_async(product_api.delete_product, (first_backend, product_id))
+        pool.apply_async(product_api.delete_product, (second_backend, product_id))
+
+
+class ListProducts(Resource):
+    def get(self):
+        ret = product_api.list_products(first_backend)
+        if ret[1] == 500:
+            ret = product_api.list_products(second_backend)
+        return ret
+
+
+class ListProductsByCart(Resource):
+    def get(self, cart_id):
+        ret = product_api.list_products_by_cart(first_backend, cart_id)
+        if ret[1] == 500:
+            ret = product_api.list_products_by_cart(second_backend, cart_id)
+        return ret
+
+
 class CartProduct(Resource):
-    def post(self, cartId, productId):
+    def post(self, cart_id, product_id):
         if request.is_json:
             body = request.get_json()
         else:
@@ -78,28 +128,30 @@ class CartProduct(Resource):
             print("2")
             return None, 400
 
-        async_result = pool.apply_async(api_requests.post_cart_product, (first_backend, cartId, productId, body))
+        async_result = pool.apply_async(cart_product_api.post_cart_product, (first_backend, cart_id, product_id, body))
         return_val = async_result.get()
 
         if return_val[1] == 500:
-            async_result = pool.apply_async(api_requests.post_cart_product, (second_backend, cartId, productId, body))
+            async_result = pool.apply_async(cart_product_api.post_cart_product,
+                                            (second_backend, cart_id, product_id, body))
             return_val = async_result.get()
         return return_val
 
-    def delete(self, cartId, productId):
-        pool.apply_async(api_requests.delete_cart_product, (first_backend, cartId, productId))
-        pool.apply_async(api_requests.delete_cart_product, (second_backend, cartId, productId))
-
+    def delete(self, cart_id, product_id):
+        pool.apply_async(cart_product_api.delete_cart_product, (first_backend, cart_id, product_id))
+        pool.apply_async(cart_product_api.delete_cart_product, (second_backend, cart_id, product_id))
 
 
 api.add_resource(NewProduct, f"{basePath}/product")
-# api.add_resource(Product, f"{basePath}/product/<int:productId>")
-# api.add_resource(ListProducts, f"{basePath}/list-products")
-# api.add_resource(ListProductsByCart, f"{basePath}/list-products-by-cart/<int:cartId>")
+api.add_resource(Product, f"{basePath}/product/<int:product_id>")
 
-api.add_resource(Cart, f"{basePath}/cart/<int:cartId>")
+api.add_resource(ListProducts, f"{basePath}/list-products")
+api.add_resource(ListProductsByCart, f"{basePath}/list-products-by-cart/<int:cart_id>")
 
-api.add_resource(CartProduct, f"{basePath}/cart/<int:cartId>/product/<int:productId>")
+api.add_resource(NewCart, f"{basePath}/cart")
+api.add_resource(Cart, f"{basePath}/cart/<int:cart_id>")
+
+api.add_resource(CartProduct, f"{basePath}/cart/<int:cart_id>/product/<int:product_id>")
 
 if __name__ == "__main__":
     app.run(host=APP_VARIABLES.BRIDGE_HOST, port=APP_VARIABLES.BRIDGE_PORT, debug=True)

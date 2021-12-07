@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_restful import Api, Resource
 from flask_cors import CORS, cross_origin
 from utility import APP_VARIABLES
-import api_requests
+from api_requests import cart_api
 
 first_backend = APP_VARIABLES.BE_A_URL
 second_backend = APP_VARIABLES.BE_B_URL
@@ -38,9 +38,9 @@ basePath = APP_VARIABLES.BRIDGE_BASEPATH
 
 class Cart(Resource):
     def get(self, cartId):
-        ret = api_requests.get_cart(first_backend, cartId)
+        ret = cart_api.get_cart(first_backend, cartId)
         if ret[1] == 500:
-            ret = api_requests.get_cart(second_backend, cartId)
+            ret = cart_api.get_cart(second_backend, cartId)
         return ret
 
 
@@ -56,13 +56,13 @@ class NewProduct(Resource):
             print("2")
             return None, 400
 
-        async_result = pool.apply_async(api_requests.insert_product, (first_backend, body))
+        async_result = pool.apply_async(cart_api.insert_product, (first_backend, body))
 
         return_val = async_result.get()
         print(f"return val {return_val}")
         # ret = api_requests.insert_product(first_backend, body)
         if return_val[1] == 201:
-            async_result = pool.apply_async(api_requests.insert_product, (second_backend, body))
+            async_result = pool.apply_async(cart_api.insert_product, (second_backend, body))
 
             second_return_val = async_result.get()
             # second_ret = api_requests.insert_product(second_backend, body)
@@ -74,7 +74,7 @@ class NewProduct(Resource):
             return return_val
         elif return_val[1] == 500:
             switchBackend()
-            async_result = pool.apply_async(api_requests.insert_product, (first_backend, body))
+            async_result = pool.apply_async(cart_api.insert_product, (first_backend, body))
             second_return_val = async_result.get()
             if second_return_val[1] == 201:
                 sincronized = False
