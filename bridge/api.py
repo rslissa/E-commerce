@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_restful import Api, Resource
 from flask_cors import CORS, cross_origin
 from utility import APP_VARIABLES
-from api_requests import cart_api, product_api, cart_product_api
+from api_requests import cart_api, product_api, cart_product_api, country_api
 
 first_backend = APP_VARIABLES.BE_A_URL
 second_backend = APP_VARIABLES.BE_B_URL
@@ -37,22 +37,9 @@ basePath = APP_VARIABLES.BRIDGE_BASEPATH
 
 class NewCart(Resource):
     def post(self):
-        if request.is_json:
-            body = request.get_json()
-        else:
-            print("1")
-            return None, 400
-        if not body:
-            print("2")
-            return None, 400
-
-        async_result = pool.apply_async(cart_api.insert_cart, (first_backend))
-        return_val = async_result.get()
-
+        return_val = cart_api.insert_cart(first_backend)
         if return_val[1] == 500:
-            async_result = pool.apply_async(cart_api.insert_cart, (second_backend))
-            return_val = async_result.get()
-
+            return_val = cart_api.insert_cart(second_backend)
         return return_val
 
 
@@ -118,6 +105,12 @@ class ListProductsByCart(Resource):
 
 
 class CartProduct(Resource):
+    def get(self, cart_id, product_id):
+        ret = cart_product_api.get_cart_product(first_backend, cart_id, product_id)
+        if ret[1] == 500:
+            ret = cart_product_api.get_cart_product(second_backend, cart_id, product_id)
+        return ret
+
     def post(self, cart_id, product_id):
         if request.is_json:
             body = request.get_json()
@@ -137,9 +130,43 @@ class CartProduct(Resource):
             return_val = async_result.get()
         return return_val
 
+    def put(self, cart_id, product_id):
+        if request.is_json:
+            body = request.get_json()
+        else:
+            print("1")
+            return None, 400
+        if not body:
+            print("2")
+            return None, 400
+
+        async_result = pool.apply_async(cart_product_api.put_cart_product, (first_backend, cart_id, product_id, body))
+        return_val = async_result.get()
+
+        if return_val[1] == 500:
+            async_result = pool.apply_async(cart_product_api.put_cart_product,
+                                            (second_backend, cart_id, product_id, body))
+            return_val = async_result.get()
+        return return_val
+
     def delete(self, cart_id, product_id):
         pool.apply_async(cart_product_api.delete_cart_product, (first_backend, cart_id, product_id))
         pool.apply_async(cart_product_api.delete_cart_product, (second_backend, cart_id, product_id))
+
+
+class ListCountries(Resource):
+    def get(self):
+        ret = country_api.list_countries(first_backend)
+        if ret[1] == 500:
+            ret = country_api.list_countries(second_backend)
+        return ret
+
+class ListSubCountries(Resource):
+    def get(self, country_code):
+        ret = country_api.list_sub_countries(first_backend, country_code)
+        if ret[1] == 500:
+            ret = country_api.list_sub_countries(second_backend, country_code)
+        return ret
 
 
 api.add_resource(NewProduct, f"{basePath}/product")
@@ -152,6 +179,9 @@ api.add_resource(NewCart, f"{basePath}/cart")
 api.add_resource(Cart, f"{basePath}/cart/<int:cart_id>")
 
 api.add_resource(CartProduct, f"{basePath}/cart/<int:cart_id>/product/<int:product_id>")
+
+api.add_resource(ListCountries, f"{basePath}/list-countries")
+api.add_resource(ListSubCountries, f"{basePath}/list-subcountries/<string:country_code>")
 
 if __name__ == "__main__":
     app.run(host=APP_VARIABLES.BRIDGE_HOST, port=APP_VARIABLES.BRIDGE_PORT, debug=True)

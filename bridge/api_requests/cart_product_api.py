@@ -6,6 +6,17 @@ headers = CaseInsensitiveDict()
 headers["Content-Type"] = "application/json"
 
 
+def put_cart_product(backend_url, cart_id, product_id, body):
+    try:
+        url = f'{backend_url}/cart/{cart_id}/product/{product_id}'
+        res = requests.put(url, headers=headers, data=json.dumps(body))
+        if res.status_code == 200:
+            return json.loads(res.text), 201
+        else:
+            return None, 400
+    except:
+        return None, 500
+
 def post_cart_product(backend_url, cart_id, product_id, body):
     try:
         url = f'{backend_url}/cart/{cart_id}/product/{product_id}'

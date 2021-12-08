@@ -10,7 +10,7 @@ def insert_cart(backend_url):
     try:
         url = f'{backend_url}/cart'
         res = requests.post(url, headers=headers)
-        if res.status_code == 201:
+        if res.status_code == 200:
             return json.loads(res.text), 201
         else:
             return None, 400

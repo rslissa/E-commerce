@@ -131,6 +131,7 @@ def update_cart(connection, cursor, operation, cart_id, product_id, new_item, de
                                                                 where cart.id_cart = {cart_id} and product.id_product = {product_id}) 
                     WHERE id_cart = {cart_id};
                     """
+    print(insert_query)
     cursor.execute(insert_query)
     connection.commit()
 
@@ -147,7 +148,6 @@ def update_cart_product(connection, cursor, operation, cart_id, product_id, body
 
 def get_cart_table(cursor, timestamp):
     query = f"SELECT * from public.cart where last_update >= '{timestamp}' ORDER BY id_cart ASC"
-    print(query)
     cursor.execute(query)
     elements = cursor.fetchall()
     results = []
@@ -223,6 +223,14 @@ def remove_cart_products(connection, cursor, cart_id):
     connection.commit()
 
     delete_query = f"Delete from public.cart_product where id_cart = {cart_id}"
+    cursor.execute(delete_query)
+    connection.commit()
+    count = cursor.rowcount
+    print(count, "Record deleted successfully ")
+    return count
+
+def remove_cart(connection, cursor, cart_id):
+    delete_query = f"Delete from public.cart where id_cart = {cart_id}"
     cursor.execute(delete_query)
     connection.commit()
     count = cursor.rowcount

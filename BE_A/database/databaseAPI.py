@@ -100,6 +100,9 @@ class DatabaseAPI(object):
     def remove_cart_products(self, cart_id):
         return cartDB.remove_cart_products(self.connection, self.connection.cursor(), cart_id)
 
+    def remove_cart(self, cart_id):
+        return cartDB.remove_cart(self.connection, self.connection.cursor(), cart_id)
+
     def list_countries(self):
         return addressDB.list_countries(self.connection.cursor())
 

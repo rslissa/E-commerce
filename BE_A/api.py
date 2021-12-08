@@ -99,7 +99,7 @@ class Cart(Resource):
         databaseAPI.insert_cart_by_id(cart_id, body)
 
     def delete(self, cart_id):
-        ret = databaseAPI.remove_cart_products(cart_id)
+        ret = databaseAPI.remove_cart(cart_id)
         if not ret:
             return None, 404
 
