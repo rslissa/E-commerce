@@ -46,7 +46,7 @@ def insert_product(backend_url, body):
     try:
         url = f'{backend_url}/product'
         res = requests.post(url, headers=headers, data=json.dumps(body))
-        if res.status_code == 201:
+        if res.status_code == 201 or res.status_code == 200:
             return json.loads(res.text), 201
         else:
             return None, 400

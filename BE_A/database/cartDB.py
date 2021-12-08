@@ -165,6 +165,7 @@ def get_cart_table(cursor, timestamp):
 
 def get_cart_product_table(cursor, timestamp):
     query = f"SELECT * from public.cart_product where last_update >=  '{timestamp}' ORDER BY id_cart, id_product ASC"
+    print(query)
     cursor.execute(query)
     elements = cursor.fetchall()
     results = []

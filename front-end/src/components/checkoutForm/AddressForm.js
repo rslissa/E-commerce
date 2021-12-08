@@ -14,14 +14,14 @@ const AddressForm = ({ next }) => {
   const methods = useForm();
 
   const fetchCountries = async () => {
-    const res = await axios.get(`http://127.0.0.1:5000/api/v1/list-countries`);
+    const res = await axios.get(`http://127.0.0.1:5000/bridge/v1/list-countries`);
     setShippingCountries(res.data);
     setShippingCountry(res.data[0]);
     return res.data;
   };
 
   const fetchSubdivisions = async (country_code) => {
-    const res = await axios.get(`http://127.0.0.1:5000/api/v1/list-subcountries/${country_code}`);
+    const res = await axios.get(`http://127.0.0.1:5000/bridge/v1/list-subcountries/${country_code}`);
     setShippingSubdivisions(res.data);
     setShippingSubdivision(res.data[0]);
     return res.data;

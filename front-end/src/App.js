@@ -17,41 +17,50 @@ const App = () => {
 
   const cartId = 1;
 
+  const currentDate = () => {
+    var today = new Date();
+    var date = today.getFullYear() + "-" + today.getMonth() + "-" + today.getDate();
+    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds() + "." + today.getMilliseconds();
+    const dateTime = date + "T" + time;
+    return dateTime;
+  };
+
   const listProducts = async () => {
-    const res = await axios.get("http://localhost:5000/api/v1/list-products");
+    const res = await axios.get("http://localhost:5000/bridge/v1/list-products");
     return res.data;
   };
 
   const listProductsByCart = async (id_cart) => {
-    const res = await axios.get(`http://127.0.0.1:5000/api/v1/list-products-by-cart/${id_cart}`);
+    const res = await axios.get(`http://127.0.0.1:5000/bridge/v1/list-products-by-cart/${id_cart}`);
     return res.data;
   };
 
   const createCart = async () => {
-    const res = await axios.get(`http://localhost:5000/api/v1/cart`);
+    const res = await axios.get(`http://localhost:5000/bridge/v1/cart`);
     return res.data;
   };
 
   const removeProductOnCart = async (id_product) => {
-    const res = await axios.delete(`http://localhost:5000/api/v1/cart/${cart["id_cart"]}/product/${id_product}`);
+    const res = await axios.delete(`http://localhost:5000/bridge/v1/cart/${cart["id_cart"]}/product/${id_product}`);
     refreshCart(cart["id_cart"]);
   };
 
   const removeProductsOnCart = async (id_product) => {
-    const res = await axios.delete(`http://localhost:5000/api/v1/cart/${cart["id_cart"]}`);
+    const res = await axios.delete(`http://localhost:5000/bridge/v1/cart/${cart["id_cart"]}`);
     refreshCart(cart["id_cart"]);
   };
 
   const getCartById = async (id_cart) => {
-    const res = await axios.get(`http://localhost:5000/api/v1/cart/${id_cart}`);
+    const res = await axios.get(`http://localhost:5000/bridge/v1/cart/${id_cart}`);
     return res.data;
   };
 
   const uploadProductOnCart = async (id_product, operation, quantity) => {
-    const payload = `{"operation": "${operation}","quantity": ${quantity}}`;
+    const dateTime = currentDate();
+    const payload = `{"operation": "${operation}","quantity": ${quantity},"last_update":"${dateTime}"}`;
     const data = JSON.parse(payload);
     const { data: response } = await axios.post(
-      `http://localhost:5000/api/v1/cart/${cart["id_cart"]}/product/${id_product}`,
+      `http://localhost:5000/bridge/v1/cart/${cart["id_cart"]}/product/${id_product}`,
       data
     );
     refreshCart(cart["id_cart"]);

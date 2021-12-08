@@ -114,6 +114,7 @@ class cartTable(Resource):
 
 class cart_productTable(Resource):
     def get(self, timestamp):
+        print(timestamp)
         cart_product = databaseAPI.get_cart_product_table(timestamp)
         if not cart_product:
             return None, 404

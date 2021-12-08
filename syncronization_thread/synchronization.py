@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from requests.structures import CaseInsensitiveDict
 
 import requests
@@ -30,6 +30,7 @@ def cart_synchronization(timestamp):
     rows_a = None
     try:
         rows_a = json.loads(requests.get(f'{first_backend}/cart-table/{timestamp}').text)
+
     except:
         print("first back-end unreachable")
 
@@ -85,6 +86,7 @@ def cart_product_synchronization(timestamp):
     try:
         # take the new rows of the cart_product table in the first Back-end
         rows_a = json.loads(requests.get(f'{first_backend}/cart-product-table/{timestamp}').text)
+        print(rows_a)
     except:
         print("first back-end unreachable")
 
@@ -141,9 +143,8 @@ def cart_product_synchronization(timestamp):
 
 
 if __name__ == '__main__':
-    timestamp = datetime.now()
-
     while 1:
-        timestamp = datetime.now()
+        timestamp = datetime.now() - timedelta(hours=0, minutes=20)
+        print(timestamp)
         cart_product_synchronization(timestamp)
         cart_synchronization(timestamp)

@@ -20,16 +20,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="122f16f6-28d5-4dc9-9f1a-cefa6e63c40a" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/../bridge/api_requests/country_api.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../BE_A/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../BE_A/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../BE_A/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BE_A/api.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../BE_A/database/cartDB.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BE_A/database/cartDB.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../BE_A/database/databaseAPI.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BE_A/database/databaseAPI.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../bridge/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/../bridge/api.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../bridge/api_requests/cart_api.py" beforeDir="false" afterPath="$PROJECT_DIR$/../bridge/api_requests/cart_api.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../bridge/api_requests/cart_product_api.py" beforeDir="false" afterPath="$PROJECT_DIR$/../bridge/api_requests/cart_product_api.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../bridge/utility/api.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../bridge/utility/api.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../bridge/api_requests/product_api.py" beforeDir="false" afterPath="$PROJECT_DIR$/../bridge/api_requests/product_api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front-end/src/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/../front-end/src/App.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../front-end/src/components/checkoutForm/AddressForm.js" beforeDir="false" afterPath="$PROJECT_DIR$/../front-end/src/components/checkoutForm/AddressForm.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../syncronization_thread/synchronization.py" beforeDir="false" afterPath="$PROJECT_DIR$/../syncronization_thread/synchronization.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

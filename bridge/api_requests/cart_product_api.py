@@ -21,8 +21,8 @@ def post_cart_product(backend_url, cart_id, product_id, body):
     try:
         url = f'{backend_url}/cart/{cart_id}/product/{product_id}'
         res = requests.post(url, headers=headers, data=json.dumps(body))
-        if res.status_code == 201:
-            return json.loads(res.text), 201
+        if res.status_code == 200 or res.status_code == 201:
+            return json.loads(res.text), 200
         else:
             return None, 400
     except:
