@@ -4,6 +4,7 @@ from database.databaseAPI import DatabaseAPI
 from flask_cors import CORS, cross_origin
 from utility import APP_VARIABLES
 
+
 app = Flask(__name__)
 api = Api(app)
 CORS(app, support_credentials=True)
@@ -99,7 +100,7 @@ class Cart(Resource):
         databaseAPI.insert_cart_by_id(cart_id, body)
 
     def delete(self, cart_id):
-        ret = databaseAPI.remove_cart(cart_id)
+        ret = databaseAPI.remove_cart_products(cart_id)
         if not ret:
             return None, 404
 
@@ -114,6 +115,7 @@ class cartTable(Resource):
 
 class cart_productTable(Resource):
     def get(self, timestamp):
+        print(timestamp)
         cart_product = databaseAPI.get_cart_product_table(timestamp)
         if not cart_product:
             return None, 404
@@ -123,9 +125,8 @@ class cart_productTable(Resource):
 class cart_product(Resource):
     def get(self, cart_id, product_id):
         cart_product = databaseAPI.get_cart_product(cart_id, product_id)
-        if not cart_product:
+        if not cart_product or cart_product['cancelled'] is True:
             return None, 404
-        print(cart_product)
         return cart_product
 
     def put(self, cart_id, product_id):
@@ -178,10 +179,14 @@ class cart_product(Resource):
                 databaseAPI.insert_cart_product(cart_id, product_id, **body)
                 databaseAPI.update_cart(new_item=True, delete=False, operation="+", cart_id=cart_id,
                                         product_id=product_id, body=body)
-                databaseAPI.get_cart(cart_id)
-                print("5")
                 return None, 201
-            if duplicate is not None:
+            if duplicate is not None and duplicate['cancelled'] is True:
+                databaseAPI.delete_cart_product(cart_id, product_id)
+                databaseAPI.insert_cart_product(cart_id, product_id, **body)
+                databaseAPI.update_cart(new_item=True, delete=False, operation="+", cart_id=cart_id,
+                                        product_id=product_id, body=body)
+                return None, 201
+            if duplicate is not None and duplicate['cancelled'] is False:
                 databaseAPI.update_cart_product(operation="+", cart_id=cart_id, product_id=product_id, body=body)
                 databaseAPI.update_cart(new_item=False, delete=False, operation="+", cart_id=cart_id,
                                         product_id=product_id, body=body)
@@ -189,9 +194,9 @@ class cart_product(Resource):
                 return None, 201
 
         if body['operation'] == 'sub':
-            if duplicate is None:
-                print("7")
-                return None, 404
+            # if duplicate is None:
+            #     print("7")
+            #     return None, 404
 
             if duplicate is not None:
                 print(duplicate)
@@ -211,12 +216,18 @@ class cart_product(Resource):
         if not isinstance(product_id, int):
             return None, 400
         cart_product = databaseAPI.get_cart_product(cart_id=cart_id, product_id=product_id)
-        databaseAPI.update_cart(new_item=False, delete=True, operation="-", cart_id=cart_id, product_id=product_id,
-                                body=cart_product)
-        ret = databaseAPI.remove_cart_product(cart_id, product_id)
-        if not ret:
+        print(cart_product)
+        if cart_product is None:
             return None, 404
+        if cart_product['cancelled']:
+            ret = databaseAPI.delete_cart_product(cart_id, product_id)
+            return ret, 200
+        else:
+            databaseAPI.update_cart(new_item=False, delete=True, operation="-", cart_id=cart_id, product_id=product_id,
+                                    body=cart_product)
+            ret = databaseAPI.remove_cart_product(cart_id, product_id)
 
+        return ret, 200
 
 class ListCountries(Resource):
     def get(self):

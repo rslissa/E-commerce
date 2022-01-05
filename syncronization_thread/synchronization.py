@@ -30,7 +30,6 @@ def cart_synchronization(timestamp):
     rows_a = None
     try:
         rows_a = json.loads(requests.get(f'{first_backend}/cart-table/{timestamp}').text)
-
     except:
         print("first back-end unreachable")
 
@@ -86,30 +85,40 @@ def cart_product_synchronization(timestamp):
     try:
         # take the new rows of the cart_product table in the first Back-end
         rows_a = json.loads(requests.get(f'{first_backend}/cart-product-table/{timestamp}').text)
-        print(rows_a)
     except:
         print("first back-end unreachable")
 
     if rows_a is not None:
+        # look if the new rows of the first back-end are present in the second back-end
         for row_a in rows_a:
-            # look if the new rows of the first back-end are present in the second back-end
             row_b = json.loads(
                 requests.get(f'{second_backend}/cart/{row_a["id_cart"]}/product/{row_a["id_product"]}').text)
             if row_b is None:
-                # if not present, insert it
-                row_a['operation'] = 'add'
-                res = requests.post(f'{second_backend}/cart/{row_a["id_cart"]}/product/{row_a["id_product"]}',
-                                    headers=headers, data=json.dumps(row_a))
+                # if not present and row_a.cancelled == False, insert it
+                if not row_a['cancelled']:
+                    row_a['operation'] = 'add'
+                    res = requests.post(f'{second_backend}/cart/{row_a["id_cart"]}/product/{row_a["id_product"]}',
+                                        headers=headers, data=json.dumps(row_a))
+                if row_a['cancelled']:
+                    res = requests.delete(f'{first_backend}/cart/{row_a["id_cart"]}/product/{row_a["id_product"]}')
             if row_b is not None:
                 # if present, it overwrites the one with the oldest timestamp
                 last_update_a = datetime.strptime(row_a['last_update'], '%Y-%m-%dT%H:%M:%S.%f').timestamp()
                 last_update_b = datetime.strptime(row_b['last_update'], '%Y-%m-%dT%H:%M:%S.%f').timestamp()
                 if last_update_a != last_update_b or row_a != row_b:
                     if last_update_a >= last_update_b:
-                        res = requests.put(f'{second_backend}/cart/{row_a["id_cart"]}/product/{row_a["id_product"]}',
+                        if row_a['cancelled']:
+                            requests.delete(f'{first_backend}/cart/{row_a["id_cart"]}/product/{row_a["id_product"]}')
+                            requests.delete(f'{second_backend}/cart/{row_a["id_cart"]}/product/{row_a["id_product"]}')
+                        if not row_a['cancelled']:
+                            requests.put(f'{second_backend}/cart/{row_a["id_cart"]}/product/{row_a["id_product"]}',
                                            headers=headers, data=json.dumps(row_a))
                     elif last_update_a < last_update_b:
-                        res = requests.put(f'{first_backend}/cart/{row_b["id_cart"]}/product/{row_b["id_product"]}',
+                        if row_b['cancelled']:
+                            requests.delete(f'{first_backend}/cart/{row_b["id_cart"]}/product/{row_b["id_product"]}')
+                            requests.delete(f'{second_backend}/cart/{row_b["id_cart"]}/product/{row_b["id_product"]}')
+                        if not row_b['cancelled']:
+                            requests.put(f'{first_backend}/cart/{row_b["id_cart"]}/product/{row_b["id_product"]}',
                                            headers=headers, data=json.dumps(row_b))
 
     rows_b = None
@@ -125,22 +134,32 @@ def cart_product_synchronization(timestamp):
             row_a = json.loads(
                 requests.get(f'{first_backend}/cart/{row_b["id_cart"]}/product/{row_b["id_product"]}').text)
             if row_a is None:
-                # if not present, insert it
-                row_b['operation'] = 'add'
-                res = requests.post(f'{first_backend}/cart/{row_b["id_cart"]}/product/{row_b["id_product"]}',
+                # if not present and row_a.cancelled == False, insert it
+                if not row_b['cancelled']:
+                    row_b['operation'] = 'add'
+                    res = requests.post(f'{first_backend}/cart/{row_b["id_cart"]}/product/{row_b["id_product"]}',
                                     headers=headers, data=json.dumps(row_b))
+                if row_b['cancelled']:
+                    res = requests.delete(f'{second_backend}/cart/{row_b["id_cart"]}/product/{row_b["id_product"]}')
             if row_a is not None:
                 # if present, it overwrites the one with the oldest timestamp
                 last_update_a = datetime.strptime(row_a['last_update'], '%Y-%m-%dT%H:%M:%S.%f').timestamp()
                 last_update_b = datetime.strptime(row_b['last_update'], '%Y-%m-%dT%H:%M:%S.%f').timestamp()
                 if last_update_a != last_update_b or row_a != row_b:
-                    if last_update_a > last_update_b:
-                        res = requests.put(f'{second_backend}/cart/{row_a["id_cart"]}/product/{row_a["id_product"]}',
-                                           headers=headers, data=json.dumps(row_a))
+                    if last_update_a >= last_update_b:
+                        if row_a['cancelled']:
+                            requests.delete(f'{first_backend}/cart/{row_a["id_cart"]}/product/{row_a["id_product"]}')
+                            requests.delete(f'{second_backend}/cart/{row_a["id_cart"]}/product/{row_a["id_product"]}')
+                        if not row_a['cancelled']:
+                            requests.put(f'{second_backend}/cart/{row_a["id_cart"]}/product/{row_a["id_product"]}',
+                                         headers=headers, data=json.dumps(row_a))
                     elif last_update_a < last_update_b:
-                        res = requests.put(f'{first_backend}/cart/{row_b["id_cart"]}/product/{row_b["id_product"]}',
-                                           headers=headers, data=json.dumps(row_b))
-
+                        if row_b['cancelled']:
+                            requests.delete(f'{first_backend}/cart/{row_b["id_cart"]}/product/{row_b["id_product"]}')
+                            requests.delete(f'{second_backend}/cart/{row_b["id_cart"]}/product/{row_b["id_product"]}')
+                        if not row_b['cancelled']:
+                            requests.put(f'{first_backend}/cart/{row_b["id_cart"]}/product/{row_b["id_product"]}',
+                                         headers=headers, data=json.dumps(row_b))
 
 if __name__ == '__main__':
     while 1:

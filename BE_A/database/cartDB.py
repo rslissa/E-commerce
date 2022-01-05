@@ -10,7 +10,7 @@ def json_serial(obj):
 
 def create_cart(connection, cursor):
     insert_query = """INSERT INTO public.cart(creation, last_update, buyed, expiring_date,total_items,
-    total_unique_items) VALUES (now(), now(), false, now()+ interval '1 day',0,0); """
+    total_unique_items,total_price) VALUES (now(), now(), false, now()+ interval '1 day',0,0,0); """
     cursor.execute(insert_query)
     connection.commit()
 
@@ -77,18 +77,20 @@ def insert_cart_product(connection, cursor, cart_id, product_id, **kwargs):
     id_cart,
     id_product,
     quantity,
-    last_update
+    last_update,
+    cancelled
     ) VALUES (
     '{cart_id}', 
     '{product_id}', 
     {kwargs.get("quantity")},
-    '{kwargs.get("last_update")}')"""
+    '{kwargs.get("last_update")}',
+    {False})"""
     cursor.execute(insert_query)
     connection.commit()
 
 
 def overwrite_cart_product(connection, cursor, cart_id, product_id, body):
-    query = f"""UPDATE public.cart_product SET quantity={body["quantity"]}, last_update='{body["last_update"]}' WHERE 
+    query = f"""UPDATE public.cart_product SET quantity={body["quantity"]}, last_update='{body["last_update"]}', cancelled={body["cancelled"]} WHERE 
             id_cart={cart_id} and id_product={product_id}; """
     cursor.execute(query)
     connection.commit()
@@ -97,7 +99,6 @@ def overwrite_cart_product(connection, cursor, cart_id, product_id, body):
 def insert_cart_by_id(connection, cursor, cart_id, body):
     ret = get_cart(cursor, cart_id)
     query = ""
-    print(body)
     if ret is None:
         query = f"""INSERT INTO public.cart(id_cart, creation, last_update, buyed, expiring_date, total_items, 
         total_unique_items, total_price) VALUES ({cart_id}, now(), '{body['last_update']}', False, now(), 
@@ -108,6 +109,7 @@ def insert_cart_by_id(connection, cursor, cart_id, body):
         WHERE id_cart={cart_id};"""
     cursor.execute(query)
     connection.commit()
+
 
 def update_cart(connection, cursor, operation, cart_id, product_id, new_item, delete, body):
     unique_item = 0
@@ -128,7 +130,8 @@ def update_cart(connection, cursor, operation, cart_id, product_id, new_item, de
                                                                  on cart_product.id_cart = cart.id_cart 
                                                                  join product
                                                                  on cart_product.id_product = product.id_product
-                                                                where cart.id_cart = {cart_id} and product.id_product = {product_id}) 
+                                                                where cart.id_cart = {cart_id} and product.id_product = {product_id}
+                                                                                and cart_product.cancelled = {False}) 
                     WHERE id_cart = {cart_id};
                     """
     print(insert_query)
@@ -140,14 +143,16 @@ def update_cart_product(connection, cursor, operation, cart_id, product_id, body
     insert_query = f"""
                     UPDATE cart_product
                     SET last_update='{body["last_update"]}', quantity = quantity {operation} {body["quantity"]}
-                    WHERE id_cart = {cart_id} and id_product={product_id};
+                    WHERE id_cart = {cart_id} and id_product={product_id} and cancelled={False};
                     """
     cursor.execute(insert_query)
     connection.commit()
 
 
 def get_cart_table(cursor, timestamp):
-    query = f"SELECT * from public.cart where last_update >= '{timestamp}' ORDER BY id_cart ASC"
+    # query = f"SELECT * from public.cart where last_update >= '{timestamp}' ORDER BY id_cart ASC"
+    query = f"SELECT * from public.cart ORDER BY id_cart ASC"
+
     cursor.execute(query)
     elements = cursor.fetchall()
     results = []
@@ -164,8 +169,8 @@ def get_cart_table(cursor, timestamp):
 
 
 def get_cart_product_table(cursor, timestamp):
-    query = f"SELECT * from public.cart_product where last_update >=  '{timestamp}' ORDER BY id_cart, id_product ASC"
-    print(query)
+    query = f"SELECT * from public.cart_product ORDER BY id_cart, id_product ASC"
+    # query = f"SELECT * from public.cart_product where last_update >=  '{timestamp}' ORDER BY id_cart, id_product ASC"
     cursor.execute(query)
     elements = cursor.fetchall()
     results = []
@@ -182,7 +187,7 @@ def get_cart_product_table(cursor, timestamp):
 
 
 def get_cart_product(cursor, cart_id, product_id):
-    query = f"SELECT * from public.cart_product where id_cart = '{cart_id}' and id_product= '{product_id}' ORDER BY " \
+    query = f"SELECT * from public.cart_product where id_cart = '{cart_id}' and id_product= '{product_id}'  ORDER BY " \
             f"id_cart ASC "
     cursor.execute(query)
     elements = cursor.fetchall()
@@ -204,12 +209,25 @@ def get_cart_product(cursor, cart_id, product_id):
 
 
 def remove_cart_product(connection, cursor, cart_id, product_id):
-    delete_query = f"Delete from public.cart_product where id_cart = {cart_id} and id_product = {product_id}"
+    delete_query = f"""
+                    UPDATE cart_product
+                    SET cancelled={True}
+                    WHERE id_cart = {cart_id} and id_product={product_id} and cancelled={False};
+                    """
+    # delete_query = f"Delete from public.cart_product where id_cart = {cart_id} and id_product = {product_id}"
+    cursor.execute(delete_query)
+    connection.commit()
+    count = cursor.rowcount
+    return count
+
+def delete_cart_product(connection, cursor, cart_id, product_id):
+    delete_query = f"Delete from public.cart_product where id_cart = {cart_id} and id_product = {product_id} and cancelled = {True}"
     cursor.execute(delete_query)
     connection.commit()
     count = cursor.rowcount
     print(count, "Record deleted successfully ")
     return count
+
 
 
 def remove_cart_products(connection, cursor, cart_id):
@@ -223,14 +241,20 @@ def remove_cart_products(connection, cursor, cart_id):
     cursor.execute(update_query)
     connection.commit()
 
-    delete_query = f"Delete from public.cart_product where id_cart = {cart_id}"
+    delete_query = f"""
+                    UPDATE cart_product
+                    SET cancelled={True}
+                    WHERE id_cart = {cart_id} and cancelled={False};
+                    """
     cursor.execute(delete_query)
     connection.commit()
     count = cursor.rowcount
     print(count, "Record deleted successfully ")
     return count
 
+
 def remove_cart(connection, cursor, cart_id):
+    remove_cart_products(connection, cursor, cart_id)
     delete_query = f"Delete from public.cart where id_cart = {cart_id}"
     cursor.execute(delete_query)
     connection.commit()

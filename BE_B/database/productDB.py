@@ -7,6 +7,7 @@ def json_serial(obj):
         return obj.isoformat()
     return obj
 
+
 def get_product_by_id(cursor, idProduct):
     query = f"SELECT * from public.product where id_product = {idProduct} ORDER BY id_product ASC"
     cursor.execute(query)
@@ -16,8 +17,7 @@ def get_product_by_id(cursor, idProduct):
     elements_serial = []
     for e in elements[0]:
         elements_serial.append(json_serial(e))
-    elements = []
-    elements.append(tuple(elements_serial))
+    elements = [tuple(elements_serial)]
     colnames = [desc[0] for desc in cursor.description]
     results = []
     for element in elements:
@@ -27,8 +27,6 @@ def get_product_by_id(cursor, idProduct):
         return False
     result = results[0]
     return result
-
-
 
 
 # def get_product(cursor, name):
@@ -62,14 +60,13 @@ def insert_product(connection, cursor, **kwargs):
     '{kwargs.get("name")}', 
     '{kwargs.get("description")}',
     {kwargs.get("price")},
-    '{kwargs.get("currencyCode")}',
+    '{kwargs.get("currency_code")}',
     '{kwargs.get("imageURL")}',
     {kwargs.get("status")},
     {kwargs.get("stock")},
     '{kwargs.get("last_update")}')"""
     cursor.execute(insert_query)
     connection.commit()
-
 
 
 def delete_product(connection, cursor, productId):
@@ -86,12 +83,10 @@ def list_products(cursor):
     elements = cursor.fetchall()
     results = []
     for element in elements:
-        print(f"element, {element}")
         elements_serial = []
         for e in element:
             elements_serial.append(json_serial(e))
-        elements = []
-        elements.append(tuple(elements_serial))
+        elements = [tuple(elements_serial)]
         colnames = [desc[0] for desc in cursor.description]
         for element in elements:
             el_dict = dict(zip(colnames, element))
@@ -103,13 +98,12 @@ def list_products_by_cart(cursor, idCart):
     query = f"""select product.*, cart_product.quantity,  (cart_product.quantity*price) as total_product_price
                         from product 
                         join cart_product on product.id_product = cart_product.id_product 
-                        where cart_product.id_cart = {idCart}
+                        where cart_product.id_cart = {idCart} and cart_product.cancelled = {False}
                         """
     cursor.execute(query)
     elements = cursor.fetchall()
     results = []
     for element in elements:
-        print(f"element, {element}")
         elements_serial = []
         for e in element:
             elements_serial.append(json_serial(e))

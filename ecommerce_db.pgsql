@@ -121,7 +121,8 @@ ALTER SEQUENCE public.cart_id_cart_seq OWNED BY public.cart.id_cart;
 CREATE TABLE public.cart_product (
     id_cart bigint NOT NULL,
     id_product bigint NOT NULL,
-    quantity bigint NOT NULL
+    quantity bigint NOT NULL,
+    last_update timestamp without time zone
 );
 
 
@@ -198,9 +199,10 @@ CREATE TABLE public.product (
     description character varying NOT NULL,
     price real NOT NULL,
     currency_code character varying(3) NOT NULL,
-    image_url character varying,
+    image_url character varying NOT NULL,
     status boolean NOT NULL,
-    stock bigint NOT NULL
+    stock bigint NOT NULL,
+    last_update timestamp without time zone NOT NULL
 );
 
 
@@ -312,7 +314,7 @@ COPY public.address (id_address, city, address, postal_code, country, region, id
 --
 
 COPY public.cart (id_cart, creation, last_update, buyed, id_user, expiring_date, total_items, total_unique_items, total_price) FROM stdin;
-1	2021-11-26 18:31:06.428957	2021-11-26 18:31:06.428957	f	\N	2021-11-27 18:31:06.428957	0	0	0
+1	2021-11-26 18:31:06.428957	2021-11-08 18:47:59.422	f	\N	2021-12-07 16:31:06.428957	0	0	0
 \.
 
 
@@ -320,7 +322,8 @@ COPY public.cart (id_cart, creation, last_update, buyed, id_user, expiring_date,
 -- Data for Name: cart_product; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.cart_product (id_cart, id_product, quantity) FROM stdin;
+COPY public.cart_product (id_cart, id_product, quantity, last_update) FROM stdin;
+1	4	1	2021-11-08 18:47:36.193
 \.
 
 
@@ -448,11 +451,11 @@ COPY public."order" (id_shipping, id_user, id_address, id_cart) FROM stdin;
 -- Data for Name: product; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.product (id_product, name, description, price, currency_code, image_url, status, stock) FROM stdin;
-4	Nero dAvola	Rosso dal gusto deciso, siciliano DOC	15	EUR	https://i.ibb.co/L9p2D14/vino-rosso.jpg	t	60
-2	Prosecco	Prodotto in Veneto, dal gusto dolce	20	EUR	https://i.ibb.co/kSZtDQJ/vino-bianco.jpg	t	30
-10	Grillo	Bianco, ottimo con cibi a base di pesce	13	EUR	https://i.ibb.co/St8ZK3B/vino-bianco-2.jpg	t	40
-11	Moscato	vino liquoroso, ottimo da accompagnare con i dolci	20	EUR	https://i.ibb.co/L9p2D14/vino-rosso.jpg	t	30
+COPY public.product (id_product, name, description, price, currency_code, image_url, status, stock, last_update) FROM stdin;
+2	Prosecco	Prodotto in Veneto, dal gusto dolce	20	EUR	https://i.ibb.co/kSZtDQJ/vino-bianco.jpg	t	30	2021-12-06 11:15:28.968609
+4	Nero dAvola	Rosso dal gusto deciso, siciliano DOC	15	EUR	https://i.ibb.co/L9p2D14/vino-rosso.jpg	t	60	2021-12-06 11:15:28.968609
+10	Grillo	Bianco, ottimo con cibi a base di pesce	13	EUR	https://i.ibb.co/St8ZK3B/vino-bianco-2.jpg	t	40	2021-12-06 11:15:28.968609
+11	Moscato	vino liquoroso, ottimo da accompagnare con i dolci	20	EUR	https://i.ibb.co/L9p2D14/vino-rosso.jpg	t	30	2021-12-06 11:15:28.968609
 \.
 
 
@@ -476,7 +479,7 @@ SELECT pg_catalog.setval('public.address_id_address_seq', 1, false);
 -- Name: cart_id_cart_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.cart_id_cart_seq', 1, true);
+SELECT pg_catalog.setval('public.cart_id_cart_seq', 14, true);
 
 
 --
@@ -490,7 +493,7 @@ SELECT pg_catalog.setval('public.countries_subdivisons_id_subdivision_seq', 96, 
 -- Name: product_id_product_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.product_id_product_seq', 11, true);
+SELECT pg_catalog.setval('public.product_id_product_seq', 35, true);
 
 
 --
@@ -538,14 +541,6 @@ ALTER TABLE ONLY public.countries
 
 ALTER TABLE ONLY public.countries_subdivisions
     ADD CONSTRAINT countries_subdivisons_pkey PRIMARY KEY (id_subdivision);
-
-
---
--- Name: product product_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.product
-    ADD CONSTRAINT product_name_key UNIQUE (name);
 
 
 --

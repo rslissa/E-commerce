@@ -19,7 +19,7 @@ const App = () => {
 
   const currentDate = () => {
     var today = new Date();
-    var date = today.getFullYear() + "-" + today.getMonth() + "-" + today.getDate();
+    var date = today.getFullYear() + "-" + today.getMonth() + 1 + "-" + today.getDate();
     var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds() + "." + today.getMilliseconds();
     const dateTime = date + "T" + time;
     return dateTime;
@@ -57,6 +57,7 @@ const App = () => {
 
   const uploadProductOnCart = async (id_product, operation, quantity) => {
     const dateTime = currentDate();
+    console.log(dateTime);
     const payload = `{"operation": "${operation}","quantity": ${quantity},"last_update":"${dateTime}"}`;
     const data = JSON.parse(payload);
     const { data: response } = await axios.post(
