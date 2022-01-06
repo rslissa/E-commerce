@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_restful import Api, Resource
 from flask_cors import CORS, cross_origin
-from database.DatabaseAPI import DatabaseAPI
+from database.CacheAPI import DatabaseAPI
 from utility import APP_VARIABLES
 from api_requests import cart_api, product_api, cart_product_api, country_api
 from multiprocessing.pool import ThreadPool
@@ -41,13 +41,14 @@ basePath = APP_VARIABLES.BRIDGE_BASEPATH
 class NewCart(Resource):
     def post(self):
         cache.create_cart()
-        Thread(target=self.thread_NewCart).start()
+        Thread(target=self.thread_post_NewCart).start()
 
-    def thread_NewCart(self):
+    def thread_post_NewCart(self):
         return_val = cart_api.insert_cart(first_backend)
         if return_val[1] == 500:
             return_val = cart_api.insert_cart(second_backend)
         return return_val
+
 
 class Cart(Resource):
     def get(self, cart_id):
@@ -63,9 +64,15 @@ class Cart(Resource):
         return ret
 
     def delete(self, cart_id):
-        cache.delete_cart(cart_id)
-        pool.apply_async(cart_api.delete_cart, (first_backend, cart_id))
-        pool.apply_async(cart_api.delete_cart, (second_backend, cart_id))
+        ret = cache.remove_cart_products(cart_id)
+        if not ret:
+            return None, 404
+        Thread(target=self.thread_delete_Cart, args=(cart_id,)).start()
+        return None, 200
+
+    def thread_delete_Cart(self, cart_id):
+        cart_api.delete_cart(first_backend, cart_id)
+        cart_api.delete_cart(second_backend, cart_id)
 
 
 class NewProduct(Resource):
@@ -79,9 +86,9 @@ class NewProduct(Resource):
             print("2")
             return None, 400
         cache.insert_product(**body)
-        Thread(target=self.thread_NewProduct, args=(body,)).start()
+        Thread(target=self.thread_post_NewProduct, args=(body,)).start()
 
-    def thread_NewProduct(self,body):
+    def thread_post_NewProduct(self, body):
         return_val = product_api.insert_product(first_backend, body)
         if return_val[1] == 500:
             return_val = product_api.insert_product(second_backend, body)
@@ -101,8 +108,13 @@ class Product(Resource):
         return ret
 
     def delete(self, product_id):
-        pool.apply_async(product_api.delete_product, (first_backend, product_id))
-        pool.apply_async(product_api.delete_product, (second_backend, product_id))
+        cache.delete_product(product_id)
+        Thread(target=self.thread_delete_Product, args=(product_id,)).start()
+        return None, 200
+
+    def thread_delete_Product(self, product_id):
+        product_api.delete_product(first_backend, product_id)
+        product_api.delete_product(second_backend, product_id)
 
 
 class ListProducts(Resource):
@@ -133,14 +145,20 @@ class ListProductsByCart(Resource):
 
 class CartProduct(Resource):
     def get(self, cart_id, product_id):
-        ret = cache.get_cart_product(cart_id, product_id)
-        if ret is None:  # if is None means that the data is not in the cache
-            ret = cart_product_api.get_cart_product(first_backend, cart_id, product_id)
-            if ret[1] == 500:
-                ret = cart_product_api.get_cart_product(second_backend, cart_id, product_id)
-            # if ret is not None and ret[1] != 500 and ret[1] != 404:
-            #       cache.insert_cart_product(cart_id, product_id, **ret[0])
-        return ret
+        ret_cart_product = cache.get_cart_product(cart_id, product_id)
+        if ret_cart_product is None:  # if is None means that the data is not in the cache
+            ret_cart_product = cart_product_api.get_cart_product(first_backend, cart_id, product_id)
+            if ret_cart_product[1] == 500:
+                ret_cart_product = cart_product_api.get_cart_product(second_backend, cart_id, product_id)
+            if ret_cart_product is not None and ret_cart_product[1] != 500 and ret_cart_product[1] != 404:
+                ret_cart = cache.get_cart(cart_id)
+                if ret_cart is None:
+                    cache.load_cart_on_cache(cart_id)
+                ret_product = cache.get_product_by_id(product_id)
+                if ret_product is None:
+                    cache.load_product_on_cache(product_id)
+                cache.insert_cart_product(cart_id, product_id, **ret_cart_product[0])
+        return ret_cart_product
 
     def post(self, cart_id, product_id):
         if request.is_json:
@@ -151,11 +169,55 @@ class CartProduct(Resource):
         if not body:
             print("2")
             return None, 400
-        cache.delete_cart(cart_id)
-        Thread(target=self.thread_PostCartProduct, args=(cart_id, product_id, body,)).start()
+        Thread(target=self.thread_post_CartProduct, args=(cart_id, product_id, body,)).start()
+        ret_cart = cache.get_cart(cart_id)
+        if ret_cart is None:
+            cache.load_cart_on_cache(cart_id)
+        ret_product = cache.get_product_by_id(product_id)
+        if ret_product is None:
+            cache.load_product_on_cache(product_id)
+
+        duplicate = cache.get_cart_product(cart_id, product_id)
+        if body['operation'] == 'add':
+            if duplicate is None:
+                body["cancelled"] = False
+                cache.insert_cart_product(cart_id, product_id, **body)
+                cache.update_cart(new_item=True, delete=False, operation="+", cart_id=cart_id,
+                                        product_id=product_id, body=body)
+                return None, 201
+            if duplicate is not None and duplicate['cancelled'] is True:
+                cache.delete_cart_product(cart_id, product_id)
+                body["cancelled"] = False
+                cache.insert_cart_product(cart_id, product_id, **body)
+                cache.update_cart(new_item=True, delete=False, operation="+", cart_id=cart_id,
+                                        product_id=product_id, body=body)
+                return None, 201
+            if duplicate is not None and duplicate['cancelled'] is False:
+                cache.update_cart_product(operation="+", cart_id=cart_id, product_id=product_id, body=body)
+                cache.update_cart(new_item=False, delete=False, operation="+", cart_id=cart_id,
+                                        product_id=product_id, body=body)
+                print("6")
+                return None, 201
+
+        if body['operation'] == 'sub':
+            # if duplicate is None:
+            #     print("7")
+            #     return None, 404
+
+            if duplicate is not None:
+                print(duplicate)
+                product_quantity = duplicate['quantity']
+                if product_quantity <= body['quantity']:
+                    cache.update_cart(new_item=False, delete=True, operation="-", cart_id=cart_id,
+                                            product_id=product_id, body=body)
+                    cache.remove_cart_product(cart_id=cart_id, product_id=product_id)
+                else:
+                    cache.update_cart_product(operation="-", cart_id=cart_id, product_id=product_id, body=body)
+                    cache.update_cart(new_item=False, delete=False, operation="-", cart_id=cart_id,
+                                            product_id=product_id, body=body)
         return None, 200
 
-    def thread_PostCartProduct(self,cart_id, product_id, body):
+    def thread_post_CartProduct(self, cart_id, product_id, body):
         return_val = cart_product_api.post_cart_product(first_backend, cart_id, product_id, body)
         if return_val[1] == 500:
             return_val = cart_product_api.post_cart_product(second_backend, cart_id, product_id, body)
@@ -181,13 +243,31 @@ class CartProduct(Resource):
         return return_val
 
     def delete(self, cart_id, product_id):
-        cache.delete_cart(cart_id)
-        Thread(target=self.thread_DeleteCartProduct, args=(cart_id, product_id,)).start()
+        if not isinstance(cart_id, int):
+            return None, 400
+        if not isinstance(product_id, int):
+            return None, 400
+
+        Thread(target=self.thread_delete_CartProduct, args=(cart_id, product_id,)).start()
+
+        cart_product = cache.get_cart_product(cart_id=cart_id, product_id=product_id)
+        print(cart_product)
+        if cart_product is None:
+            return None, 404
+        if cart_product['cancelled']:
+            ret = cache.delete_cart_product(cart_id, product_id)
+            return ret, 200
+        else:
+            cache.update_cart(new_item=False, delete=True, operation="-", cart_id=cart_id, product_id=product_id,
+                                    body=cart_product)
+            ret = cache.remove_cart_product(cart_id, product_id)
+
         return None, 200
 
-    def thread_DeleteCartProduct(self, cart_id, product_id):
+    def thread_delete_CartProduct(self, cart_id, product_id):
         cart_product_api.delete_cart_product(first_backend, cart_id, product_id)
         cart_product_api.delete_cart_product(second_backend, cart_id, product_id)
+
 
 class ListCountries(Resource):
     def get(self):

@@ -134,7 +134,6 @@ def update_cart(connection, cursor, operation, cart_id, product_id, new_item, de
                                                                                 and cart_product.cancelled = {False}) 
                     WHERE id_cart = {cart_id};
                     """
-    print(insert_query)
     cursor.execute(insert_query)
     connection.commit()
 

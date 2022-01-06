@@ -1,8 +1,12 @@
 import psycopg2
 from psycopg2 import Error
+
+from api_requests import cart_api, product_api
 from utility import APP_VARIABLES
 from datetime import date, datetime
 
+first_backend = APP_VARIABLES.BE_A_URL
+second_backend = APP_VARIABLES.BE_B_URL
 
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
@@ -78,6 +82,14 @@ class DatabaseAPI(object):
         cursor.execute(query)
         self.connection.commit()
 
+    def load_cart_on_cache(self, cart_id):
+        ret = cart_api.get_cart(first_backend, cart_id)
+        if ret[1] == 500:
+            ret = cart_api.get_cart(second_backend, cart_id)
+        if ret is not None and ret[1] != 500 and ret[1] != 404:
+            self.insert_cart_by_id(cart_id, ret[0])
+        return ret
+
     def delete_cart(self, id_cart):
         cursor = self.connection.cursor()
         delete_query = f"Delete from public.cart where id_cart = {id_cart}"
@@ -86,6 +98,55 @@ class DatabaseAPI(object):
         count = cursor.rowcount
         print(count, "Record deleted successfully ")
         return count
+
+    def remove_cart_products(self, cart_id):
+        cursor = self.connection.cursor()
+        update_query = f"""
+                        UPDATE cart 
+                        SET total_items = 0,
+                            total_unique_items = 0,
+                            total_price = 0
+                        WHERE id_cart = {cart_id};
+                        """
+        cursor.execute(update_query)
+        self.connection.commit()
+
+        delete_query = f"""
+                        UPDATE cart_product
+                        SET cancelled={True}
+                        WHERE id_cart = {cart_id} and cancelled={False};
+                        """
+        cursor.execute(delete_query)
+        self.connection.commit()
+        count = cursor.rowcount
+        return count
+
+    def update_cart(self, operation, cart_id, product_id, new_item, delete, body):
+        cursor = self.connection.cursor()
+        unique_item = 0
+        unique_operation = '+'
+        if new_item:
+            unique_item = 1
+        if delete:
+            unique_item = 1
+            unique_operation = '-'
+
+        insert_query = f"""
+                        UPDATE cart 
+                        SET last_update='{body["last_update"]}', total_items = total_items {operation} {body["quantity"]},
+                            total_unique_items = total_unique_items {unique_operation} {unique_item},
+                            total_price = total_price {operation} (select (product.price*{body["quantity"]})
+                                                                     from cart_product 
+                                                                     join cart 
+                                                                     on cart_product.id_cart = cart.id_cart 
+                                                                     join product
+                                                                     on cart_product.id_product = product.id_product
+                                                                    where cart.id_cart = {cart_id} and product.id_product = {product_id}
+                                                                                    and cart_product.cancelled = {False}) 
+                        WHERE id_cart = {cart_id};
+                        """
+        cursor.execute(insert_query)
+        self.connection.commit()
 
     def get_product_by_id(self, idProduct):
         cursor = self.connection.cursor()
@@ -131,6 +192,54 @@ class DatabaseAPI(object):
         cursor.execute(insert_query)
         self.connection.commit()
 
+    def insert_product_by_id(self, product_id, **kwargs):
+        cursor = self.connection.cursor()
+        ret = self.get_product_by_id(product_id)
+        query = ""
+        if ret is None:
+            query = f""" INSERT INTO product (
+            name,
+            description,
+            price,
+            currency_code,
+            image_url,
+            status,
+            stock,
+            last_update
+            ) VALUES (
+            '{kwargs.get("name")}', 
+            '{kwargs.get("description")}',
+            {kwargs.get("price")},
+            '{kwargs.get("currency_code")}',
+            '{kwargs.get("imageURL")}',
+            {kwargs.get("status")},
+            {kwargs.get("stock")},
+            '{kwargs.get("last_update")}')"""
+        if ret is not None:
+            query = f"""UPDATE public.product SET last_update='{kwargs.get("last_update")}', stock={kwargs.get("stock")}, 
+            status={kwargs.get("status")}, image_url={kwargs.get("image_url")}, currency_code='{kwargs.get("currency_code")}',
+            price={kwargs.get("price")}, description='{kwargs.get("description")}', name='{kwargs.get("name")}' 
+            WHERE id_product={product_id};"""
+        cursor.execute(query)
+        self.connection.commit()
+
+    def load_product_on_cache(self, product_id):
+        ret = product_api.get_product(first_backend, product_id)
+        if ret[1] == 500:
+            ret = product_api.get_product(second_backend, product_id)
+        if ret is not None and ret[1] != 500 and ret[1] != 404:
+            self.insert_product_by_id(product_id, **ret[0])
+        return ret
+
+    def delete_product(self, id_product):
+        cursor = self.connection.cursor()
+        delete_query = f"Delete from public.product where id_product = {id_product}"
+        cursor.execute(delete_query)
+        self.connection.commit()
+        count = cursor.rowcount
+        print(count, "Record deleted successfully ")
+        return count
+
     def get_cart_product(self, cart_id, product_id):
         cursor = self.connection.cursor()
         query = f"SELECT * from public.cart_product where id_cart = '{cart_id}' and id_product= '{product_id}' ORDER BY " \
@@ -167,7 +276,41 @@ class DatabaseAPI(object):
         {kwargs.get("quantity")},
         '{kwargs.get("last_update")}',
         {kwargs.get("cancelled")})"""
+        print(insert_query)
         cursor.execute(insert_query)
         self.connection.commit()
+
+    def update_cart_product(self, operation, cart_id, product_id, body):
+        cursor = self.connection.cursor()
+        insert_query = f"""
+                        UPDATE cart_product
+                        SET last_update='{body["last_update"]}', quantity = quantity {operation} {body["quantity"]}
+                        WHERE id_cart = {cart_id} and id_product={product_id} and cancelled={False};
+                        """
+        cursor.execute(insert_query)
+
+        self.connection.commit()
+
+    def remove_cart_product(self, cart_id, product_id):
+        cursor = self.connection.cursor()
+        delete_query = f"""
+                        UPDATE cart_product
+                        SET cancelled={True}
+                        WHERE id_cart = {cart_id} and id_product={product_id} and cancelled={False};
+                        """
+        # delete_query = f"Delete from public.cart_product where id_cart = {cart_id} and id_product = {product_id}"
+        cursor.execute(delete_query)
+        self.connection.commit()
+        count = cursor.rowcount
+        return count
+
+    def delete_cart_product(self, cart_id, product_id):
+        cursor = self.connection.cursor()
+        delete_query = f"Delete from public.cart_product where id_cart = {cart_id} and id_product = {product_id} and cancelled = {True}"
+        cursor.execute(delete_query)
+        self.connection.commit()
+        count = cursor.rowcount
+        print(count, "Record deleted successfully ")
+        return count
 
 
