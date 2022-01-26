@@ -98,7 +98,7 @@ def list_products_by_cart(cursor, idCart):
     query = f"""select product.*, cart_product.quantity,  (cart_product.quantity*price) as total_product_price
                         from product 
                         join cart_product on product.id_product = cart_product.id_product 
-                        where cart_product.id_cart = {idCart} and cart_product.cancelled = {False}
+                        where cart_product.id_cart = {idCart} and cart_product.deleted = {False}
                         """
     cursor.execute(query)
     elements = cursor.fetchall()

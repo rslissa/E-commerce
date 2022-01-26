@@ -53,8 +53,8 @@ class NewCart(Resource):
 class Cart(Resource):
     def get(self, cart_id):
         ret = cache.get_cart(cart_id)
-        print(f"ret cache {ret}")
-        if ret is None:  # if is None means that the data is not in the cache
+        # if is None means that the data is not in the cache
+        if ret is None:
             ret = cart_api.get_cart(first_backend, cart_id)
             if ret[1] == 500:
                 ret = cart_api.get_cart(second_backend, cart_id)
@@ -180,19 +180,19 @@ class CartProduct(Resource):
         duplicate = cache.get_cart_product(cart_id, product_id)
         if body['operation'] == 'add':
             if duplicate is None:
-                body["cancelled"] = False
+                body["deleted"] = False
                 cache.insert_cart_product(cart_id, product_id, **body)
                 cache.update_cart(new_item=True, delete=False, operation="+", cart_id=cart_id,
                                         product_id=product_id, body=body)
                 return None, 201
-            if duplicate is not None and duplicate['cancelled'] is True:
+            if duplicate is not None and duplicate['deleted'] is True:
                 cache.delete_cart_product(cart_id, product_id)
-                body["cancelled"] = False
+                body["deleted"] = False
                 cache.insert_cart_product(cart_id, product_id, **body)
                 cache.update_cart(new_item=True, delete=False, operation="+", cart_id=cart_id,
                                         product_id=product_id, body=body)
                 return None, 201
-            if duplicate is not None and duplicate['cancelled'] is False:
+            if duplicate is not None and duplicate['deleted'] is False:
                 cache.update_cart_product(operation="+", cart_id=cart_id, product_id=product_id, body=body)
                 cache.update_cart(new_item=False, delete=False, operation="+", cart_id=cart_id,
                                         product_id=product_id, body=body)
@@ -254,7 +254,7 @@ class CartProduct(Resource):
         print(cart_product)
         if cart_product is None:
             return None, 404
-        if cart_product['cancelled']:
+        if cart_product['deleted']:
             ret = cache.delete_cart_product(cart_id, product_id)
             return ret, 200
         else:

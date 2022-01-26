@@ -125,7 +125,7 @@ class cart_productTable(Resource):
 class cart_product(Resource):
     def get(self, cart_id, product_id):
         cart_product = databaseAPI.get_cart_product(cart_id, product_id)
-        if not cart_product or cart_product['cancelled'] is True:
+        if not cart_product or cart_product['deleted'] is True:
             return None, 404
         return cart_product
 
@@ -180,13 +180,13 @@ class cart_product(Resource):
                 databaseAPI.update_cart(new_item=True, delete=False, operation="+", cart_id=cart_id,
                                         product_id=product_id, body=body)
                 return None, 201
-            if duplicate is not None and duplicate['cancelled'] is True:
+            if duplicate is not None and duplicate['deleted'] is True:
                 databaseAPI.delete_cart_product(cart_id, product_id)
                 databaseAPI.insert_cart_product(cart_id, product_id, **body)
                 databaseAPI.update_cart(new_item=True, delete=False, operation="+", cart_id=cart_id,
                                         product_id=product_id, body=body)
                 return None, 201
-            if duplicate is not None and duplicate['cancelled'] is False:
+            if duplicate is not None and duplicate['deleted'] is False:
                 databaseAPI.update_cart_product(operation="+", cart_id=cart_id, product_id=product_id, body=body)
                 databaseAPI.update_cart(new_item=False, delete=False, operation="+", cart_id=cart_id,
                                         product_id=product_id, body=body)
@@ -219,7 +219,7 @@ class cart_product(Resource):
         print(cart_product)
         if cart_product is None:
             return None, 404
-        if cart_product['cancelled']:
+        if cart_product['deleted']:
             ret = databaseAPI.delete_cart_product(cart_id, product_id)
             return ret, 200
         else:

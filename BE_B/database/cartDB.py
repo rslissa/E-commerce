@@ -78,7 +78,7 @@ def insert_cart_product(connection, cursor, cart_id, product_id, **kwargs):
     id_product,
     quantity,
     last_update,
-    cancelled
+    deleted
     ) VALUES (
     '{cart_id}', 
     '{product_id}', 
@@ -90,7 +90,7 @@ def insert_cart_product(connection, cursor, cart_id, product_id, **kwargs):
 
 
 def overwrite_cart_product(connection, cursor, cart_id, product_id, body):
-    query = f"""UPDATE public.cart_product SET quantity={body["quantity"]}, last_update='{body["last_update"]}', cancelled={body["cancelled"]} WHERE 
+    query = f"""UPDATE public.cart_product SET quantity={body["quantity"]}, last_update='{body["last_update"]}', deleted={body["deleted"]} WHERE 
             id_cart={cart_id} and id_product={product_id}; """
     cursor.execute(query)
     connection.commit()
@@ -131,7 +131,7 @@ def update_cart(connection, cursor, operation, cart_id, product_id, new_item, de
                                                                  join product
                                                                  on cart_product.id_product = product.id_product
                                                                 where cart.id_cart = {cart_id} and product.id_product = {product_id}
-                                                                                and cart_product.cancelled = {False}) 
+                                                                                and cart_product.deleted = {False}) 
                     WHERE id_cart = {cart_id};
                     """
     cursor.execute(insert_query)
@@ -142,7 +142,7 @@ def update_cart_product(connection, cursor, operation, cart_id, product_id, body
     insert_query = f"""
                     UPDATE cart_product
                     SET last_update='{body["last_update"]}', quantity = quantity {operation} {body["quantity"]}
-                    WHERE id_cart = {cart_id} and id_product={product_id} and cancelled={False};
+                    WHERE id_cart = {cart_id} and id_product={product_id} and deleted={False};
                     """
     cursor.execute(insert_query)
     connection.commit()
@@ -210,8 +210,8 @@ def get_cart_product(cursor, cart_id, product_id):
 def remove_cart_product(connection, cursor, cart_id, product_id):
     delete_query = f"""
                     UPDATE cart_product
-                    SET cancelled={True}
-                    WHERE id_cart = {cart_id} and id_product={product_id} and cancelled={False};
+                    SET deleted={True}
+                    WHERE id_cart = {cart_id} and id_product={product_id} and deleted={False};
                     """
     # delete_query = f"Delete from public.cart_product where id_cart = {cart_id} and id_product = {product_id}"
     cursor.execute(delete_query)
@@ -220,7 +220,7 @@ def remove_cart_product(connection, cursor, cart_id, product_id):
     return count
 
 def delete_cart_product(connection, cursor, cart_id, product_id):
-    delete_query = f"Delete from public.cart_product where id_cart = {cart_id} and id_product = {product_id} and cancelled = {True}"
+    delete_query = f"Delete from public.cart_product where id_cart = {cart_id} and id_product = {product_id} and deleted = {True}"
     cursor.execute(delete_query)
     connection.commit()
     count = cursor.rowcount
@@ -242,8 +242,8 @@ def remove_cart_products(connection, cursor, cart_id):
 
     delete_query = f"""
                     UPDATE cart_product
-                    SET cancelled={True}
-                    WHERE id_cart = {cart_id} and cancelled={False};
+                    SET deleted={True}
+                    WHERE id_cart = {cart_id} and deleted={False};
                     """
     cursor.execute(delete_query)
     connection.commit()

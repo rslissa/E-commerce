@@ -113,8 +113,8 @@ class DatabaseAPI(object):
 
         delete_query = f"""
                         UPDATE cart_product
-                        SET cancelled={True}
-                        WHERE id_cart = {cart_id} and cancelled={False};
+                        SET deleted={True}
+                        WHERE id_cart = {cart_id} and deleted={False};
                         """
         cursor.execute(delete_query)
         self.connection.commit()
@@ -142,7 +142,7 @@ class DatabaseAPI(object):
                                                                      join product
                                                                      on cart_product.id_product = product.id_product
                                                                     where cart.id_cart = {cart_id} and product.id_product = {product_id}
-                                                                                    and cart_product.cancelled = {False}) 
+                                                                                    and cart_product.deleted = {False}) 
                         WHERE id_cart = {cart_id};
                         """
         cursor.execute(insert_query)
@@ -269,13 +269,13 @@ class DatabaseAPI(object):
         id_product,
         quantity,
         last_update, 
-        cancelled
+        deleted
         ) VALUES (
         '{cart_id}', 
         '{product_id}', 
         {kwargs.get("quantity")},
         '{kwargs.get("last_update")}',
-        {kwargs.get("cancelled")})"""
+        {kwargs.get("deleted")})"""
         print(insert_query)
         cursor.execute(insert_query)
         self.connection.commit()
@@ -285,7 +285,7 @@ class DatabaseAPI(object):
         insert_query = f"""
                         UPDATE cart_product
                         SET last_update='{body["last_update"]}', quantity = quantity {operation} {body["quantity"]}
-                        WHERE id_cart = {cart_id} and id_product={product_id} and cancelled={False};
+                        WHERE id_cart = {cart_id} and id_product={product_id} and deleted={False};
                         """
         cursor.execute(insert_query)
 
@@ -295,8 +295,8 @@ class DatabaseAPI(object):
         cursor = self.connection.cursor()
         delete_query = f"""
                         UPDATE cart_product
-                        SET cancelled={True}
-                        WHERE id_cart = {cart_id} and id_product={product_id} and cancelled={False};
+                        SET deleted={True}
+                        WHERE id_cart = {cart_id} and id_product={product_id} and deleted={False};
                         """
         # delete_query = f"Delete from public.cart_product where id_cart = {cart_id} and id_product = {product_id}"
         cursor.execute(delete_query)
@@ -306,7 +306,7 @@ class DatabaseAPI(object):
 
     def delete_cart_product(self, cart_id, product_id):
         cursor = self.connection.cursor()
-        delete_query = f"Delete from public.cart_product where id_cart = {cart_id} and id_product = {product_id} and cancelled = {True}"
+        delete_query = f"Delete from public.cart_product where id_cart = {cart_id} and id_product = {product_id} and deleted = {True}"
         cursor.execute(delete_query)
         self.connection.commit()
         count = cursor.rowcount

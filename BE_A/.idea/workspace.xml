@@ -21,11 +21,16 @@
   <component name="ChangeListManager">
     <list default="true" id="122f16f6-28d5-4dc9-9f1a-cefa6e63c40a" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/api.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/cartDB.py" beforeDir="false" afterPath="$PROJECT_DIR$/database/cartDB.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/productDB.py" beforeDir="false" afterPath="$PROJECT_DIR$/database/productDB.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../BE_B/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../BE_B/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BE_B/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BE_B/api.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../BE_B/database/cartDB.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BE_B/database/cartDB.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BE_B/database/productDB.py" beforeDir="false" afterPath="$PROJECT_DIR$/../BE_B/database/productDB.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../bridge/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/../bridge/api.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../bridge/database/DatabaseAPI.py" beforeDir="false" afterPath="$PROJECT_DIR$/../bridge/database/CacheAPI.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../bridge/database/CacheAPI.py" beforeDir="false" afterPath="$PROJECT_DIR$/../bridge/database/CacheAPI.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../syncronization_thread/synchronization.py" beforeDir="false" afterPath="$PROJECT_DIR$/../syncronization_thread/synchronization.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -145,30 +150,30 @@
     </state>
     <state x="549" y="172" key="FileChooserDialogImpl/0.0.1536.834/1920.0.1024.738@0.0.1536.834" timestamp="1638605911860" />
     <state x="549" y="172" key="FileChooserDialogImpl/0.0.1536.834@0.0.1536.834" timestamp="1641372261608" />
-    <state width="1515" height="116" key="GridCell.Tab.0.bottom" timestamp="1641405311392">
+    <state width="1515" height="313" key="GridCell.Tab.0.bottom" timestamp="1641719707809">
       <screen x="0" y="0" width="1536" height="834" />
     </state>
     <state width="1515" height="116" key="GridCell.Tab.0.bottom/0.0.1536.834/1920.0.1024.738@0.0.1536.834" timestamp="1641405311392" />
     <state width="1003" height="116" key="GridCell.Tab.0.bottom/0.0.1536.834/1920.0.1024.738@1920.0.1024.738" timestamp="1641403484121" />
-    <state width="1515" height="116" key="GridCell.Tab.0.bottom/0.0.1536.834@0.0.1536.834" timestamp="1641399870427" />
-    <state width="1515" height="116" key="GridCell.Tab.0.center" timestamp="1641405311392">
+    <state width="1515" height="313" key="GridCell.Tab.0.bottom/0.0.1536.834@0.0.1536.834" timestamp="1641719707809" />
+    <state width="1515" height="313" key="GridCell.Tab.0.center" timestamp="1641719707809">
       <screen x="0" y="0" width="1536" height="834" />
     </state>
     <state width="1515" height="116" key="GridCell.Tab.0.center/0.0.1536.834/1920.0.1024.738@0.0.1536.834" timestamp="1641405311392" />
     <state width="1003" height="116" key="GridCell.Tab.0.center/0.0.1536.834/1920.0.1024.738@1920.0.1024.738" timestamp="1641403484121" />
-    <state width="1515" height="116" key="GridCell.Tab.0.center/0.0.1536.834@0.0.1536.834" timestamp="1641399870426" />
-    <state width="1515" height="116" key="GridCell.Tab.0.left" timestamp="1641405311392">
+    <state width="1515" height="313" key="GridCell.Tab.0.center/0.0.1536.834@0.0.1536.834" timestamp="1641719707809" />
+    <state width="1515" height="313" key="GridCell.Tab.0.left" timestamp="1641719707809">
       <screen x="0" y="0" width="1536" height="834" />
     </state>
     <state width="1515" height="116" key="GridCell.Tab.0.left/0.0.1536.834/1920.0.1024.738@0.0.1536.834" timestamp="1641405311392" />
     <state width="1003" height="116" key="GridCell.Tab.0.left/0.0.1536.834/1920.0.1024.738@1920.0.1024.738" timestamp="1641403484121" />
-    <state width="1515" height="116" key="GridCell.Tab.0.left/0.0.1536.834@0.0.1536.834" timestamp="1641399870425" />
-    <state width="1515" height="116" key="GridCell.Tab.0.right" timestamp="1641405311392">
+    <state width="1515" height="313" key="GridCell.Tab.0.left/0.0.1536.834@0.0.1536.834" timestamp="1641719707809" />
+    <state width="1515" height="313" key="GridCell.Tab.0.right" timestamp="1641719707809">
       <screen x="0" y="0" width="1536" height="834" />
     </state>
     <state width="1515" height="116" key="GridCell.Tab.0.right/0.0.1536.834/1920.0.1024.738@0.0.1536.834" timestamp="1641405311392" />
     <state width="1003" height="116" key="GridCell.Tab.0.right/0.0.1536.834/1920.0.1024.738@1920.0.1024.738" timestamp="1641403484121" />
-    <state width="1515" height="116" key="GridCell.Tab.0.right/0.0.1536.834@0.0.1536.834" timestamp="1641399870426" />
+    <state width="1515" height="313" key="GridCell.Tab.0.right/0.0.1536.834@0.0.1536.834" timestamp="1641719707809" />
     <state x="277" y="62" key="SettingsEditor" timestamp="1638551946276">
       <screen x="0" y="0" width="1536" height="834" />
     </state>
@@ -177,6 +182,10 @@
       <screen x="0" y="0" width="1536" height="834" />
     </state>
     <state x="93" y="93" width="1350" height="648" key="com.intellij.history.integration.ui.views.FileHistoryDialog/0.0.1536.834/1920.0.1024.738@0.0.1536.834" timestamp="1637744367984" />
+    <state x="478" y="121" width="579" height="592" key="find.popup" timestamp="1641635394828">
+      <screen x="0" y="0" width="1536" height="834" />
+    </state>
+    <state x="478" y="121" width="579" height="592" key="find.popup/0.0.1536.834@0.0.1536.834" timestamp="1641635394828" />
     <state x="431" y="155" width="672" height="678" key="search.everywhere.popup" timestamp="1641291959326">
       <screen x="0" y="0" width="1536" height="834" />
     </state>
